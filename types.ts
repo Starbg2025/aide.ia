@@ -1,4 +1,3 @@
-
 export type Role = 'user' | 'assistant';
 
 export interface Message {
@@ -6,6 +5,12 @@ export interface Message {
   role: Role;
   text: string;
   image?: string; 
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
 }
 
 export type Theme = 'light' | 'dark';

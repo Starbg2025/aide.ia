@@ -1,12 +1,8 @@
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 
-const API_KEY = process.env.API_KEY;
-if (!API_KEY) {
-  // This is a fallback for development; in a real environment, the key should be set.
-  console.warn("API_KEY environment variable not set. Using a placeholder.");
-}
-const ai = new GoogleGenAI({ apiKey: API_KEY || 'YOUR_API_KEY_HERE' });
+// The API key MUST be obtained exclusively from the environment variable `process.env.API_KEY`.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const fileToGenerativePart = async (file: File): Promise<Part> => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
@@ -26,8 +22,6 @@ export const generateResponse = async (prompt: string, image?: File): Promise<st
     return CREATOR_RESPONSE;
   }
 
-  const model = ai.models;
-  
   try {
     const parts: Part[] = [{ text: prompt }];
 
@@ -36,7 +30,7 @@ export const generateResponse = async (prompt: string, image?: File): Promise<st
       parts.unshift(imagePart); // Put image first for better context
     }
     
-    const response: GenerateContentResponse = await model.generateContent({
+    const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: { parts: parts },
         // Add a system instruction to guide the AI's personality

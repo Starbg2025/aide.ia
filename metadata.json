@@ -1,0 +1,7 @@
+{
+  "name": "AideIA",
+  "description": "L’intelligence qui vous simplifie la vie.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

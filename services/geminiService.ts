@@ -1,8 +1,15 @@
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 
-// The API key MUST be obtained exclusively from the environment variable `process.env.API_KEY`.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Fonction pour obtenir le client de manière sécurisée
+// Cela évite un crash au démarrage de l'app si la clé est vide
+const getAiClient = (): GoogleGenAI => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API key not valid or missing");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 const fileToGenerativePart = async (file: File): Promise<Part> => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
@@ -23,6 +30,9 @@ export const generateResponse = async (prompt: string, image?: File): Promise<st
   }
 
   try {
+    // On initialise le client ici, au moment de l'appel, plutôt qu'au chargement du fichier
+    const ai = getAiClient();
+    
     const parts: Part[] = [{ text: prompt }];
 
     if (image) {
@@ -48,8 +58,8 @@ export const generateResponse = async (prompt: string, image?: File): Promise<st
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    if (error instanceof Error && error.message.includes('API key not valid')) {
-       return "Erreur de configuration: La clé API n'est pas valide. Veuillez contacter le support technique.";
+    if (error instanceof Error && (error.message.includes('API key') || error.message.includes('not valid'))) {
+       return "Erreur de configuration: La clé API n'est pas valide ou manquante. Veuillez vérifier les paramètres de votre espace Hugging Face (Secrets).";
     }
     return "Désolé, une erreur est survenue lors de la communication avec l'IA. Veuillez vérifier votre connexion ou réessayer plus tard.";
   }

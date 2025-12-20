@@ -1,12 +1,12 @@
+
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
+import { AIProvider } from '../types';
 
-// Fonction pour obtenir le client de manière sécurisée
-// Cela évite un crash au démarrage de l'app si la clé est vide
 const getAiClient = (): GoogleGenAI => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API key not valid or missing");
+    throw new Error("API key missing. Please check your configuration.");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -22,45 +22,70 @@ const fileToGenerativePart = async (file: File): Promise<Part> => {
   };
 };
 
-export const generateResponse = async (prompt: string, image?: File): Promise<string> => {
-  // Check for creator-related keywords
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
+};
+
+export const generateResponse = async (prompt: string, provider: AIProvider = 'gemini', image?: File): Promise<string> => {
   const lowerCasePrompt = prompt.toLowerCase();
   if (CREATOR_KEYWORDS.some(keyword => lowerCasePrompt.includes(keyword))) {
     return CREATOR_RESPONSE;
   }
 
   try {
-    // On initialise le client ici, au moment de l'appel, plutôt qu'au chargement du fichier
-    const ai = getAiClient();
-    
-    const parts: Part[] = [{ text: prompt }];
+     let imageBase64 = undefined;
+     if (image) {
+         const fullBase64 = await fileToBase64(image);
+         imageBase64 = fullBase64.split(',')[1];
+     }
 
-    if (image) {
-      const imagePart = await fileToGenerativePart(image);
-      parts.unshift(imagePart); // Put image first for better context
-    }
-    
-    const response: GenerateContentResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: { parts: parts },
-        // Add a system instruction to guide the AI's personality
-        config: {
-            systemInstruction: "Tu es AideIA, un assistant IA amical, expert et pédagogue. Ton but est de simplifier la vie de tes utilisateurs en fournissant des réponses claires, précises et créatives. Tu es multilingue et peux gérer une large gamme de tâches, de l'aide aux devoirs au support technique. Sois toujours respectueux et encourageant. Pour l'analyse d'images, sois extrêmement méticuleux : identifie les objets, les personnes et les lieux, lis et transcris tout texte visible (OCR), et réponds aux questions en te basant exclusivement sur le contenu de l'image. Si aucune question n'est posée, fournis une description riche et détaillée. Pour toute question mathématique, agis comme un excellent professeur. Ta mission est d'enseigner, pas seulement de répondre. Ne donne JAMAIS la réponse finale sans une explication complète. Tu dois impérativement : 1. Reformuler le problème pour t'assurer de l'avoir compris. 2. Détailler la solution étape par étape, en expliquant la logique derrière chaque calcul. 3. Utiliser le format Markdown (par exemple, en utilisant des blocs de code pour les formules complexes) pour rendre les équations et les expressions mathématiques parfaitement lisibles. Ta réponse doit être si claire que quelqu'un qui a des difficultés avec le sujet puisse la comprendre.",
+     const apiResponse = await fetch('/.netlify/functions/chat', {
+         method: 'POST',
+         headers: {
+             'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+             prompt: prompt,
+             provider: provider,
+             image: imageBase64
+         })
+     });
+
+     if (apiResponse.ok) {
+         const data = await apiResponse.json();
+         return data.text;
+     } else {
+         throw new Error(`API error: ${apiResponse.status}`); 
+     }
+
+  } catch (apiError) {
+    // Fallback local uniquement pour Gemini car DeepSeek nécessite OpenRouter (Server-side)
+    if (provider === 'gemini') {
+        try {
+            const ai = getAiClient();
+            const parts: Part[] = [{ text: prompt }];
+            if (image) {
+                const imagePart = await fileToGenerativePart(image);
+                parts.unshift(imagePart);
+            }
+            const response: GenerateContentResponse = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: { parts: parts },
+                config: {
+                    systemInstruction: "Tu es AideIA, un assistant IA amical et expert.",
+                }
+            });
+            return response.text || "Erreur de génération.";
+        } catch (err) {
+            console.error(err);
+            return "Erreur technique. Vérifiez votre clé API dans les variables d'environnement.";
         }
-    });
-
-    const text = response.text;
-    if (text) {
-        return text;
-    } else {
-        return "Je n'ai pas pu générer de réponse. Veuillez réessayer.";
     }
-
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    if (error instanceof Error && (error.message.includes('API key') || error.message.includes('not valid'))) {
-       return "Erreur de configuration: La clé API n'est pas valide ou manquante. Veuillez vérifier les paramètres de votre espace Hugging Face (Secrets).";
-    }
-    return "Désolé, une erreur est survenue lors de la communication avec l'IA. Veuillez vérifier votre connexion ou réessayer plus tard.";
+    return "Désolé, ce modèle (DeepSeek) nécessite une configuration serveur active sur Netlify.";
   }
 };

@@ -1,4 +1,7 @@
+
 export type Role = 'user' | 'assistant';
+
+export type AIProvider = 'gemini' | 'deepseek';
 
 export interface Message {
   id: string;
@@ -11,6 +14,7 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
+  provider?: AIProvider;
 }
 
 export type Theme = 'light' | 'dark';

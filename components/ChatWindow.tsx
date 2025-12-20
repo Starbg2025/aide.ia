@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Message as MessageType, Conversation } from '../types';
+import { Message as MessageType, Conversation, AIProvider } from '../types';
 import { generateResponse } from '../services/geminiService';
 import Message from './Message';
 import ConversationSidebar from './ConversationSidebar';
 import { PaperAirplaneIcon, PaperClipIcon, XCircleIcon, MicrophoneIcon, MenuIcon } from './Icons';
 
-// Add SpeechRecognition interfaces for TypeScript
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
@@ -27,8 +27,9 @@ const createNewConversation = (): Conversation => ({
   id: Date.now().toString() + Math.random().toString(36).substring(2),
   title: 'Nouvelle discussion',
   messages: [
-    { id: 'initial', role: 'assistant', text: "Bonjour ! Comment puis-je vous aider aujourd'hui ?" }
+    { id: 'initial', role: 'assistant', text: "Bonjour ! Comment puis-je vous aider aujourd'hui ? Vous pouvez choisir entre Gemini (rapide) et DeepSeek (expert) via le menu ci-dessus." }
   ],
+  provider: 'gemini'
 });
 
 
@@ -41,6 +42,7 @@ const ChatWindow: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('gemini');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,11 +56,12 @@ const ChatWindow: React.FC = () => {
         if (Array.isArray(parsedConversations) && parsedConversations.length > 0) {
           setConversations(parsedConversations);
           setActiveConversationId(parsedConversations[0].id);
+          setSelectedProvider(parsedConversations[0].provider || 'gemini');
           return;
         }
       }
     } catch (error) {
-      console.error("Failed to load conversations from localStorage", error);
+      console.error("Failed to load conversations", error);
     }
     const newConversation = createNewConversation();
     setConversations([newConversation]);
@@ -76,27 +79,15 @@ const ChatWindow: React.FC = () => {
         const transcript = event.results[0][0].transcript;
         setInput(prevInput => prevInput ? `${prevInput.trim()} ${transcript}` : transcript);
       };
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        if (event.error === 'not-allowed') {
-            alert("L'accès au microphone a été refusé. Vous pouvez le réactiver dans les paramètres de votre navigateur.");
-        }
-        setIsListening(false);
-      };
+      recognition.onerror = () => setIsListening(false);
       recognition.onend = () => setIsListening(false);
       recognitionRef.current = recognition;
-    } else {
-      console.warn("L'API Web Speech n'est pas supportée par ce navigateur.");
     }
   }, []);
 
   useEffect(() => {
     if (conversations.length > 0) {
-        try {
-            localStorage.setItem('aideia-conversations', JSON.stringify(conversations));
-        } catch (error) {
-            console.error("Failed to save conversations to localStorage", error);
-        }
+        localStorage.setItem('aideia-conversations', JSON.stringify(conversations));
     }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversations, activeConversationId]);
@@ -106,10 +97,8 @@ const ChatWindow: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
-      if (file.size > MAX_FILE_SIZE) {
-        alert("Le fichier est trop volumineux. Veuillez choisir une image de moins de 4 Mo.");
-        if (fileInputRef.current) fileInputRef.current.value = "";
+      if (selectedProvider === 'deepseek') {
+        alert("DeepSeek ne supporte pas encore l'analyse d'images. Veuillez utiliser Gemini pour cette fonctionnalité.");
         return;
       }
       setImageFile(file);
@@ -129,21 +118,20 @@ const ChatWindow: React.FC = () => {
     setActiveConversationId(newConversation.id);
     setInput('');
     removeImage(); 
-    setIsLoading(false);
-    if (isListening && recognitionRef.current) {
-        recognitionRef.current.stop();
-    }
     setIsSidebarOpen(false);
-  }, [isListening]);
+  }, []);
   
   const handleSelectChat = (id: string) => {
-    if (isLoading) return;
+    const conv = conversations.find(c => c.id === id);
+    if (conv) {
+      setSelectedProvider(conv.provider || 'gemini');
+    }
     setActiveConversationId(id);
     setIsSidebarOpen(false);
   };
 
   const handleDeleteChat = (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette discussion ? Cette action est irréversible.")) {
+    if (window.confirm("Supprimer cette discussion ?")) {
       setConversations(prev => {
         const remaining = prev.filter(c => c.id !== id);
         if (remaining.length === 0) {
@@ -151,9 +139,7 @@ const ChatWindow: React.FC = () => {
           setActiveConversationId(newConv.id);
           return [newConv];
         }
-        if (activeConversationId === id) {
-          setActiveConversationId(remaining[0].id);
-        }
+        if (activeConversationId === id) setActiveConversationId(remaining[0].id);
         return remaining;
       });
     }
@@ -171,14 +157,16 @@ const ChatWindow: React.FC = () => {
     };
     
     const isFirstUserMessage = activeConversation?.messages.length === 1 && activeConversation.messages[0].id === 'initial';
-    const newTitle = isFirstUserMessage && input.trim() ? input.trim().substring(0, 35) + (input.trim().length > 35 ? '...' : '') : activeConversation?.title;
+    const newTitle = isFirstUserMessage && input.trim() ? input.trim().substring(0, 35) : activeConversation?.title;
 
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
-        const newMessages = isFirstUserMessage
-          ? [userMessage]
-          : [...conv.messages, userMessage];
-        return { ...conv, title: newTitle, messages: newMessages };
+        return { 
+          ...conv, 
+          title: newTitle, 
+          provider: selectedProvider,
+          messages: isFirstUserMessage ? [userMessage] : [...conv.messages, userMessage] 
+        };
       }
       return conv;
     }));
@@ -188,7 +176,7 @@ const ChatWindow: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const responseText = await generateResponse(input, imageFile ?? undefined);
+      const responseText = await generateResponse(input, selectedProvider, imageFile ?? undefined);
       const assistantMessage: MessageType = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -201,11 +189,11 @@ const ChatWindow: React.FC = () => {
           return conv;
       }));
     } catch (error) {
-      console.error("Error generating response:", error);
+      console.error(error);
       const errorMessage: MessageType = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        text: "Désolé, une erreur est survenue. Veuillez réessayer.",
+        text: "Désolé, une erreur est survenue.",
       };
       setConversations(prev => prev.map(conv => {
           if (conv.id === activeConversationId) {
@@ -216,26 +204,6 @@ const ChatWindow: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit(e as unknown as React.FormEvent);
-    }
-  };
-
-  const handleToggleListening = () => {
-      if (!recognitionRef.current) {
-          alert("La reconnaissance vocale n'est pas supportée par votre navigateur.");
-          return;
-      }
-      if (isListening) {
-          recognitionRef.current.stop();
-      } else {
-          recognitionRef.current.start();
-          setIsListening(true);
-      }
   };
 
   return (
@@ -250,13 +218,30 @@ const ChatWindow: React.FC = () => {
             isSidebarOpen={isSidebarOpen}
         />
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="flex-shrink-0 flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-1 mr-3 text-gray-500 dark:text-gray-400">
-                <MenuIcon className="w-6 h-6"/>
-            </button>
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate">
-                {activeConversation?.title || 'Conversation'}
-            </h2>
+        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-1 mr-3 text-gray-500 dark:text-gray-400">
+                  <MenuIcon className="w-6 h-6"/>
+              </button>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate max-w-[150px] md:max-w-xs">
+                  {activeConversation?.title || 'Conversation'}
+              </h2>
+            </div>
+            
+            <div className="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-full text-xs font-medium">
+              <button 
+                onClick={() => setSelectedProvider('gemini')}
+                className={`px-3 py-1 rounded-full transition-all ${selectedProvider === 'gemini' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+              >
+                Gemini
+              </button>
+              <button 
+                onClick={() => setSelectedProvider('deepseek')}
+                className={`px-3 py-1 rounded-full transition-all ${selectedProvider === 'deepseek' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+              >
+                DeepSeek R1
+              </button>
+            </div>
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto">
@@ -272,12 +257,8 @@ const ChatWindow: React.FC = () => {
             {imagePreview && (
                 <div className="relative w-24 h-24 mb-2">
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-md"/>
-                    <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5 hover:bg-red-500"
-                    >
-                    <XCircleIcon className="w-5 h-5"/>
+                    <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5 hover:bg-red-500">
+                      <XCircleIcon className="w-5 h-5"/>
                     </button>
                 </div>
             )}
@@ -285,49 +266,35 @@ const ChatWindow: React.FC = () => {
                 <textarea
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Posez votre question ici..."
-                className="w-full pl-12 pr-28 py-3 rounded-full bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-all"
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit(e as any))}
+                placeholder={selectedProvider === 'gemini' ? "Posez une question ou envoyez une image..." : "Posez une question à DeepSeek Expert..."}
+                className="w-full pl-12 pr-28 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-all"
                 rows={1}
                 style={{ minHeight: '52px' }}
-                onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = 'auto';
-                    target.style.height = `${target.scrollHeight}px`;
-                }}
                 />
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleImageChange} 
-                    accept="image/*" 
-                    className="hidden"
-                />
+                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden"/>
                 <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    aria-label="Attach file"
+                    disabled={selectedProvider === 'deepseek'}
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors ${selectedProvider === 'deepseek' ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
                 >
                     <PaperClipIcon className="w-6 h-6" />
                 </button>
                 <button
                 type="button"
-                onClick={handleToggleListening}
-                className={`absolute right-14 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${
-                    isListening
-                    ? 'text-white bg-red-500 animate-pulse'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-                aria-label={isListening ? "Arrêter l'écoute" : "Commencer l'écoute"}
+                onClick={() => {
+                  if (isListening) recognitionRef.current?.stop();
+                  else { recognitionRef.current?.start(); setIsListening(true); }
+                }}
+                className={`absolute right-14 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-300 ${isListening ? 'text-white bg-red-500 animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
                 >
                 <MicrophoneIcon className="w-6 h-6" />
                 </button>
                 <button 
                 type="submit" 
                 disabled={isLoading || (!input.trim() && !imageFile)} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-all transform hover:scale-110"
-                aria-label="Send message"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-all transform hover:scale-110"
                 >
                 <PaperAirplaneIcon className="w-6 h-6" />
                 </button>

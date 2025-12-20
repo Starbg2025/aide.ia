@@ -27,14 +27,14 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
           L’intelligence qui vous <span className="text-primary-600 dark:text-primary-400">simplifie la vie.</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Votre assistant personnel virtuel pour trouver des réponses, résoudre des problèmes et libérer votre créativité.
+          Votre assistant personnel virtuel propulsé par DeepSeek pour trouver des réponses précises et libérer votre créativité.
         </p>
         <button 
           onClick={onStartChat}
           className="bg-primary-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:bg-primary-700 transition-transform transform hover:scale-105 duration-300 flex items-center gap-2 mx-auto"
         >
           <SparklesIcon className="w-6 h-6" />
-          Discuter maintenant
+          Discuter avec DeepSeek
         </button>
       </div>
       
@@ -43,33 +43,33 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
           <FeatureCard 
             icon={<ChatBubbleIcon className="w-6 h-6" />}
-            title="Chat Interactif Intelligent"
-            description="Posez toutes vos questions, de la programmation à la poésie, et obtenez des réponses instantanées."
+            title="Chat Intelligent"
+            description="Profitez de la puissance de DeepSeek R1 pour des raisonnements complexes et des réponses détaillées."
           />
           <FeatureCard 
             icon={<AcademicCapIcon className="w-6 h-6" />}
             title="Aide aux Étudiants"
-            description="Faites-vous expliquer des cours, résoudre des exercices ou générer des résumés pour réviser."
+            description="Faites-vous expliquer des concepts difficiles ou résoudre des problèmes mathématiques étape par étape."
           />
           <FeatureCard 
             icon={<CodeBracketIcon className="w-6 h-6" />}
-            title="Création et Support Technique"
-            description="Générez du code, des scripts, ou obtenez de l'aide pour vos projets informatiques et créatifs."
+            title="Expert en Code"
+            description="Générez, optimisez et déboguez votre code dans n'importe quel langage de programmation."
           />
            <FeatureCard 
             icon={<LanguageIcon className="w-6 h-6" />}
-            title="Assistant Multilingue"
-            description="Traduisez instantanément et discutez dans plusieurs langues comme le français, l'anglais, et plus encore."
+            title="Polyglotte"
+            description="Traduisez vos textes et discutez naturellement dans plus de 50 langues différentes."
           />
             <FeatureCard 
             icon={<SparklesIcon className="w-6 h-6" />}
-            title="Créativité sans limites"
-            description="Générez des poèmes, des chansons, des histoires et des idées de projets pour booster votre imagination."
+            title="Créativité Débridée"
+            description="Rédaction d'emails, de rapports, de scripts ou de contenus créatifs de haute qualité."
           />
            <FeatureCard 
-            icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>}
-            title="Analyse d'Images"
-            description="Téléchargez une image et posez des questions à son sujet. L'IA la comprendra et y répondra."
+            icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18v3m0 0h.01m-.01 0H12m0-3h.01M12 15h.01M12 12h.01M12 9h.01M12 6h.01M12 3h.01M9 21h.01M6 21h.01M3 21h.01M15 21h.01M18 21h.01M21 21h.01" /></svg>}
+            title="Raisonnement Avancé"
+            description="DeepSeek R1 analyse chaque nuance de votre demande pour fournir la réponse la plus pertinente."
           />
         </div>
       </div>

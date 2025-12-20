@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Message as MessageType, Conversation, AIProvider } from '../types';
+import { Message as MessageType, Conversation } from '../types';
 import { generateResponse } from '../services/geminiService';
 import Message from './Message';
 import ConversationSidebar from './ConversationSidebar';
-import { PaperAirplaneIcon, PaperClipIcon, XCircleIcon, MicrophoneIcon, MenuIcon } from './Icons';
+import { PaperAirplaneIcon, MicrophoneIcon, MenuIcon } from './Icons';
 
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
@@ -27,9 +27,8 @@ const createNewConversation = (): Conversation => ({
   id: Date.now().toString() + Math.random().toString(36).substring(2),
   title: 'Nouvelle discussion',
   messages: [
-    { id: 'initial', role: 'assistant', text: "Bonjour ! Comment puis-je vous aider aujourd'hui ? Vous pouvez choisir entre Gemini (rapide) et DeepSeek (expert) via le menu ci-dessus." }
-  ],
-  provider: 'gemini'
+    { id: 'initial', role: 'assistant', text: "Bonjour ! Je suis AideIA, propulsé par DeepSeek R1. Comment puis-je vous aider aujourd'hui ?" }
+  ]
 });
 
 
@@ -38,14 +37,10 @@ const ChatWindow: React.FC = () => {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('gemini');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
@@ -56,7 +51,6 @@ const ChatWindow: React.FC = () => {
         if (Array.isArray(parsedConversations) && parsedConversations.length > 0) {
           setConversations(parsedConversations);
           setActiveConversationId(parsedConversations[0].id);
-          setSelectedProvider(parsedConversations[0].provider || 'gemini');
           return;
         }
       }
@@ -94,38 +88,15 @@ const ChatWindow: React.FC = () => {
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (selectedProvider === 'deepseek') {
-        alert("DeepSeek ne supporte pas encore l'analyse d'images. Veuillez utiliser Gemini pour cette fonctionnalité.");
-        return;
-      }
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-  
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if(fileInputRef.current) fileInputRef.current.value = "";
-  }
-
   const handleNewChat = useCallback(() => {
     const newConversation = createNewConversation();
     setConversations(prev => [newConversation, ...prev]);
     setActiveConversationId(newConversation.id);
     setInput('');
-    removeImage(); 
     setIsSidebarOpen(false);
   }, []);
   
   const handleSelectChat = (id: string) => {
-    const conv = conversations.find(c => c.id === id);
-    if (conv) {
-      setSelectedProvider(conv.provider || 'gemini');
-    }
     setActiveConversationId(id);
     setIsSidebarOpen(false);
   };
@@ -147,24 +118,22 @@ const ChatWindow: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading || (!input.trim() && !imageFile) || !activeConversationId) return;
+    if (isLoading || !input.trim() || !activeConversationId) return;
 
     const userMessage: MessageType = {
       id: Date.now().toString(),
       role: 'user',
       text: input,
-      ...(imagePreview && { image: imagePreview }),
     };
     
     const isFirstUserMessage = activeConversation?.messages.length === 1 && activeConversation.messages[0].id === 'initial';
-    const newTitle = isFirstUserMessage && input.trim() ? input.trim().substring(0, 35) : activeConversation?.title;
+    const newTitle = isFirstUserMessage ? input.trim().substring(0, 35) : activeConversation?.title;
 
     setConversations(prev => prev.map(conv => {
       if (conv.id === activeConversationId) {
         return { 
           ...conv, 
           title: newTitle, 
-          provider: selectedProvider,
           messages: isFirstUserMessage ? [userMessage] : [...conv.messages, userMessage] 
         };
       }
@@ -172,11 +141,10 @@ const ChatWindow: React.FC = () => {
     }));
 
     setInput('');
-    removeImage();
     setIsLoading(true);
 
     try {
-      const responseText = await generateResponse(input, selectedProvider, imageFile ?? undefined);
+      const responseText = await generateResponse(input);
       const assistantMessage: MessageType = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -207,7 +175,7 @@ const ChatWindow: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full h-full max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden">
+    <div className="flex w-full h-full max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div className={`md:hidden fixed inset-0 bg-black/30 z-30 transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
         <ConversationSidebar
             conversations={conversations}
@@ -218,7 +186,7 @@ const ChatWindow: React.FC = () => {
             isSidebarOpen={isSidebarOpen}
         />
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
             <div className="flex items-center">
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-1 mr-3 text-gray-500 dark:text-gray-400">
                   <MenuIcon className="w-6 h-6"/>
@@ -227,20 +195,8 @@ const ChatWindow: React.FC = () => {
                   {activeConversation?.title || 'Conversation'}
               </h2>
             </div>
-            
-            <div className="flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-full text-xs font-medium">
-              <button 
-                onClick={() => setSelectedProvider('gemini')}
-                className={`px-3 py-1 rounded-full transition-all ${selectedProvider === 'gemini' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
-              >
-                Gemini
-              </button>
-              <button 
-                onClick={() => setSelectedProvider('deepseek')}
-                className={`px-3 py-1 rounded-full transition-all ${selectedProvider === 'deepseek' ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
-              >
-                DeepSeek R1
-              </button>
+            <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
+              DeepSeek R1
             </div>
         </div>
 
@@ -254,33 +210,16 @@ const ChatWindow: React.FC = () => {
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <form onSubmit={handleSubmit} className="relative">
-            {imagePreview && (
-                <div className="relative w-24 h-24 mb-2">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-md"/>
-                    <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 bg-gray-700 text-white rounded-full p-0.5 hover:bg-red-500">
-                      <XCircleIcon className="w-5 h-5"/>
-                    </button>
-                </div>
-            )}
             <div className="relative">
                 <textarea
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit(e as any))}
-                placeholder={selectedProvider === 'gemini' ? "Posez une question ou envoyez une image..." : "Posez une question à DeepSeek Expert..."}
-                className="w-full pl-12 pr-28 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-all"
+                placeholder="Posez votre question à AideIA..."
+                className="w-full pl-4 pr-24 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-all"
                 rows={1}
                 style={{ minHeight: '52px' }}
                 />
-                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden"/>
-                <button 
-                    type="button" 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={selectedProvider === 'deepseek'}
-                    className={`absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors ${selectedProvider === 'deepseek' ? 'opacity-30 cursor-not-allowed' : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-                >
-                    <PaperClipIcon className="w-6 h-6" />
-                </button>
                 <button
                 type="button"
                 onClick={() => {
@@ -293,7 +232,7 @@ const ChatWindow: React.FC = () => {
                 </button>
                 <button 
                 type="submit" 
-                disabled={isLoading || (!input.trim() && !imageFile)} 
+                disabled={isLoading || !input.trim()} 
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary-500 text-white rounded-full hover:bg-primary-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-all transform hover:scale-110"
                 >
                 <PaperAirplaneIcon className="w-6 h-6" />
@@ -301,7 +240,7 @@ const ChatWindow: React.FC = () => {
             </div>
             </form>
         </div>
-        </div>
+      </div>
     </div>
   );
 };

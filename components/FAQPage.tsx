@@ -36,35 +36,30 @@ const FAQPage: React.FC = () => {
             <h1 className="text-3xl font-bold mb-6 text-center text-primary-600 dark:text-primary-400">Aide & Questions Fréquentes</h1>
             
             <div className="space-y-4">
-                <FAQItem question="Comment utiliser AideIA ?">
-                    <p>C'est très simple ! Rendez-vous sur la page "Chat IA", écrivez votre question dans la zone de texte en bas, et appuyez sur "Envoyer". L'assistant vous répondra instantanément.</p>
+                <FAQItem question="C'est quoi AideIA ?">
+                    <p>AideIA est un assistant virtuel propulsé par le modèle <strong>DeepSeek R1</strong>, conçu pour vous aider dans vos tâches quotidiennes, vos études et votre travail grâce à une intelligence de pointe.</p>
                 </FAQItem>
 
                 <FAQItem question="Quels types de questions puis-je poser ?">
-                    <p>Vous pouvez poser presque n'importe quelle question ! Voici quelques exemples :</p>
+                    <p>Grâce à DeepSeek, AideIA excelle dans :</p>
                     <ul>
-                        <li><strong>Éducatif :</strong> "Explique-moi la photosynthèse."</li>
-                        <li><strong>Programmation :</strong> "Écris une fonction Python pour trier une liste."</li>
-                        <li><strong>Créatif :</strong> "Donne-moi une idée de poème sur la lune."</li>
-                        <li><strong>Traduction :</strong> "Comment dit-on 'bonjour' en lingala ?"</li>
-                        <li><strong>Conseils :</strong> "Quels sont les avantages du mode sombre ?"</li>
+                        <li><strong>Raisonnement :</strong> Résolution de problèmes complexes étape par étape.</li>
+                        <li><strong>Programmation :</strong> Aide experte en développement logiciel.</li>
+                        <li><strong>Rédaction :</strong> Création de contenus professionnels ou créatifs.</li>
+                        <li><strong>Éducation :</strong> Explications pédagogiques sur n'importe quel sujet.</li>
                     </ul>
-                </FAQItem>
-                
-                <FAQItem question="Comment analyser une image ?">
-                     <p>Cliquez sur l'icône trombone (📎) à côté de la zone de texte, sélectionnez une image sur votre appareil. Une fois l'image chargée, vous pouvez ajouter une question la concernant (par exemple, "Qu'est-ce que c'est ?") ou simplement l'envoyer pour que l'IA la décrive.</p>
                 </FAQItem>
 
                 <FAQItem question="Mes conversations sont-elles sauvegardées ?">
-                    <p>Oui, vos conversations sont sauvegardées automatiquement dans votre navigateur. Si vous fermez l'onglet et revenez plus tard, vous pourrez reprendre là où vous vous étiez arrêté. Notez que cela ne fonctionne que sur le même appareil et le même navigateur.</p>
+                    <p>Oui, vos conversations sont sauvegardées localement dans votre navigateur. Elles ne quittent pas votre appareil, sauf pour être traitées anonymement par l'IA lors de vos envois.</p>
                 </FAQItem>
 
-                <FAQItem question="Est-ce que mes données personnelles sont protégées ?">
-                    <p>Absolument. La protection de votre vie privée est notre priorité. Nous ne stockons aucune information personnelle identifiable et vos conversations sont anonymes. N'hésitez pas à consulter notre politique de confidentialité (lien fictif pour l'exemple).</p>
+                <FAQItem question="Est-ce gratuit ?">
+                    <p>Oui, AideIA utilise actuellement le modèle gratuit de DeepSeek via OpenRouter pour vous offrir un service performant sans frais.</p>
                 </FAQItem>
                 
-                 <FAQItem question="Qui est le créateur de cette IA ?">
-                    <p>AideIA a été créé par Benit Madimba en 2025. C'est un projet visant à rendre l'intelligence artificielle accessible et utile pour tous.</p>
+                 <FAQItem question="Qui a créé AideIA ?">
+                    <p>Le site a été créé et conçu par Benit Madimba en 2025 pour simplifier l'accès à l'IA de nouvelle génération.</p>
                 </FAQItem>
             </div>
         </div>

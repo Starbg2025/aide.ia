@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { SparklesIcon, ChatBubbleIcon, AcademicCapIcon, CodeBracketIcon, LanguageIcon } from './Icons';
+// Added MicrophoneIcon to imports
+import { SparklesIcon, ChatBubbleIcon, AcademicCapIcon, CodeBracketIcon, LanguageIcon, PaperClipIcon, MicrophoneIcon } from './Icons';
 
 interface HomePageProps {
   onStartChat: () => void;
@@ -20,21 +21,21 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
   return (
     <div className="w-full text-center flex flex-col items-center">
       <div className="max-w-4xl">
-        <div className="inline-block bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full px-4 py-1 mb-4 font-semibold">
-          Bienvenue sur AideIA.com
+        <div className="inline-block bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full px-4 py-1 mb-4 font-semibold text-sm">
+          Nouveau : Analyse d'Images & Mode Ultra-Rapide
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
           L’intelligence qui vous <span className="text-primary-600 dark:text-primary-400">simplifie la vie.</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Votre assistant personnel virtuel propulsé par DeepSeek pour trouver des réponses précises et libérer votre créativité.
+          Découvrez AideIA, votre assistant multimodal capable de comprendre vos textes et vos images avec une rapidité exceptionnelle.
         </p>
         <button 
           onClick={onStartChat}
           className="bg-primary-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:bg-primary-700 transition-transform transform hover:scale-105 duration-300 flex items-center gap-2 mx-auto"
         >
           <SparklesIcon className="w-6 h-6" />
-          Discuter avec DeepSeek
+          Commencer à discuter
         </button>
       </div>
       
@@ -43,33 +44,33 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
           <FeatureCard 
             icon={<ChatBubbleIcon className="w-6 h-6" />}
-            title="Chat Intelligent"
-            description="Profitez de la puissance de DeepSeek R1 pour des raisonnements complexes et des réponses détaillées."
+            title="Réponses Instantanées"
+            description="Le moteur Flash 3 garantit des réponses quasi immédiates, optimisant votre productivité."
+          />
+          <FeatureCard 
+            icon={<PaperClipIcon className="w-6 h-6" />}
+            title="Analyse d'Images"
+            description="Importez vos photos, captures d'écran ou schémas pour obtenir une analyse détaillée."
+          />
+          <FeatureCard 
+            icon={<MicrophoneIcon className="w-6 h-6" />}
+            title="Contrôle Vocal"
+            description="Parlez à AideIA et écoutez ses réponses avec des voix naturelles de haute qualité."
           />
           <FeatureCard 
             icon={<AcademicCapIcon className="w-6 h-6" />}
-            title="Aide aux Étudiants"
-            description="Faites-vous expliquer des concepts difficiles ou résoudre des problèmes mathématiques étape par étape."
+            title="Aide Multimodale"
+            description="Résolvez des problèmes complexes en combinant explications textuelles et visuelles."
           />
           <FeatureCard 
             icon={<CodeBracketIcon className="w-6 h-6" />}
-            title="Expert en Code"
-            description="Générez, optimisez et déboguez votre code dans n'importe quel langage de programmation."
+            title="Expert Coding"
+            description="Générez et débuggez votre code plus vite que jamais grâce à l'optimisation Flash."
           />
-           <FeatureCard 
+          <FeatureCard 
             icon={<LanguageIcon className="w-6 h-6" />}
             title="Polyglotte"
-            description="Traduisez vos textes et discutez naturellement dans plus de 50 langues différentes."
-          />
-            <FeatureCard 
-            icon={<SparklesIcon className="w-6 h-6" />}
-            title="Créativité Débridée"
-            description="Rédaction d'emails, de rapports, de scripts ou de contenus créatifs de haute qualité."
-          />
-           <FeatureCard 
-            icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18v3m0 0h.01m-.01 0H12m0-3h.01M12 15h.01M12 12h.01M12 9h.01M12 6h.01M12 3h.01M9 21h.01M6 21h.01M3 21h.01M15 21h.01M18 21h.01M21 21h.01" /></svg>}
-            title="Raisonnement Avancé"
-            description="DeepSeek R1 analyse chaque nuance de votre demande pour fournir la réponse la plus pertinente."
+            description="Traduisez des documents ou des images contenant du texte dans plus de 100 langues."
           />
         </div>
       </div>

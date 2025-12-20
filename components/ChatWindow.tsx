@@ -7,30 +7,19 @@ import Message from './Message';
 import ConversationSidebar from './ConversationSidebar';
 import { PaperAirplaneIcon, MicrophoneIcon, MenuIcon, CogIcon, XCircleIcon, PaperClipIcon, VolumeUpIcon } from './Icons';
 
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  onresult: (event: any) => void;
-  onerror: (event: any) => void;
-  onend: () => void;
-}
-
 const VOICES: { name: VoiceName, label: string, desc: string }[] = [
-  { name: 'Zephyr', label: 'Zephyr', desc: 'Doux & Calme' },
-  { name: 'Kore', label: 'Kore', desc: 'Clair & Neutre' },
-  { name: 'Puck', label: 'Puck', desc: 'Joyeux & Dynamique' },
-  { name: 'Charon', label: 'Charon', desc: 'Profond & Mystérieux' },
-  { name: 'Fenrir', label: 'Fenrir', desc: 'Sérieux & Autoritaire' },
+  { name: 'Zephyr', label: 'Zephyr', desc: 'Féminin - Doux' },
+  { name: 'Kore', label: 'Kore', desc: 'Féminin - Clair' },
+  { name: 'Puck', label: 'Puck', desc: 'Masculin - Dynamique' },
+  { name: 'Charon', label: 'Charon', desc: 'Masculin - Profond' },
+  { name: 'Fenrir', label: 'Fenrir', desc: 'Masculin - Sérieux' },
 ];
 
 const createNewConversation = (): Conversation => ({
   id: Date.now().toString(),
   title: 'Nouvelle discussion',
   messages: [
-    { id: 'init', role: 'assistant', text: "Bonjour ! Je suis AideIA. Je suis configuré en mode 'Ultra-Rapide'. Vous pouvez me parler, m'écouter ou m'envoyer des images." }
+    { id: 'init', role: 'assistant', text: "Bonjour ! Je suis AideIA. Je combine la puissance de DeepSeek R1 et la vision de Gemini. Comment puis-je vous aider ?" }
   ]
 });
 
@@ -52,7 +41,7 @@ const ChatWindow: React.FC = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     localStorage.setItem('aideia-voice-v2', JSON.stringify(voiceSettings));
@@ -78,12 +67,15 @@ const ChatWindow: React.FC = () => {
     if (SpeechAPI) {
       const recognition = new SpeechAPI();
       recognition.continuous = false;
+      recognition.interimResults = false;
       recognition.lang = 'fr-FR';
+      recognition.onstart = () => setIsListening(true);
       recognition.onresult = (e: any) => {
         const text = e.results[0][0].transcript;
         setInput(prev => prev ? `${prev} ${text}` : text);
       };
       recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
       recognitionRef.current = recognition;
     }
   }, []);
@@ -115,6 +107,15 @@ const ChatWindow: React.FC = () => {
     setImageFile(null);
     setImagePreview(null);
     stopSpeech();
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      stopSpeech();
+      recognitionRef.current?.start();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,46 +185,53 @@ const ChatWindow: React.FC = () => {
           <div className="flex items-center gap-3">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-gray-500"><MenuIcon className="w-6 h-6"/></button>
             <h2 className="font-bold truncate max-w-[200px]">{activeConversation?.title}</h2>
-            <span className="hidden sm:inline-block px-2 py-0.5 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-full">ULTRA-RAPIDE</span>
           </div>
-          <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className={`p-2 rounded-full transition-colors ${isSettingsOpen ? 'bg-primary-500 text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+          <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className={`p-2 rounded-full transition-all ${isSettingsOpen ? 'bg-primary-500 text-white shadow-lg' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
             <CogIcon className="w-6 h-6"/>
           </button>
         </header>
 
         {isSettingsOpen && (
-          <div className="p-4 bg-primary-50 dark:bg-primary-900/10 border-b border-primary-100 dark:border-primary-900/30 animate-in slide-in-from-top duration-300">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-5 bg-primary-50 dark:bg-primary-900/10 border-b border-primary-100 dark:border-primary-900/30 animate-in slide-in-from-top duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Choix de la voix</label>
+                <label className="block text-xs font-bold text-primary-600 uppercase mb-2">Choix de la voix</label>
                 <select 
                   value={voiceSettings.voiceName}
                   onChange={(e) => setVoiceSettings(v => ({...v, voiceName: e.target.value as VoiceName}))}
-                  className="w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 text-sm"
+                  className="w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm shadow-sm"
                 >
                   {VOICES.map(v => <option key={v.name} value={v.name}>{v.label} ({v.desc})</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Vitesse ({voiceSettings.speed}x)</label>
+                <label className="block text-xs font-bold text-primary-600 uppercase mb-2">Vitesse de lecture ({voiceSettings.speed}x)</label>
                 <input 
                   type="range" min="0.5" max="2" step="0.1" 
                   value={voiceSettings.speed}
                   onChange={(e) => setVoiceSettings(v => ({...v, speed: parseFloat(e.target.value)}))}
-                  className="w-full accent-primary-500"
+                  className="w-full h-2 bg-primary-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                 />
+                <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                  <span>Lent</span>
+                  <span>Normal</span>
+                  <span>Rapide</span>
+                </div>
               </div>
-              <div className="flex items-center gap-4 pt-4 sm:pt-0">
-                <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                  <input type="checkbox" checked={voiceSettings.autoPlay} onChange={(e) => setVoiceSettings(v => ({...v, autoPlay: e.target.checked}))} className="w-4 h-4 rounded text-primary-500" />
-                  Lecture Auto
+              <div className="flex flex-col justify-center">
+                <label className="flex items-center gap-3 text-sm cursor-pointer font-semibold group">
+                  <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${voiceSettings.autoPlay ? 'bg-primary-600' : 'bg-gray-300'}`}>
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${voiceSettings.autoPlay ? 'translate-x-4' : ''}`} />
+                  </div>
+                  <input type="checkbox" checked={voiceSettings.autoPlay} onChange={(e) => setVoiceSettings(v => ({...v, autoPlay: e.target.checked}))} className="hidden" />
+                  Lecture automatique
                 </label>
               </div>
             </div>
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scroll-smooth">
           {activeConversation?.messages.map(m => (
             <Message key={m.id} message={m} onSpeak={(text) => speakText(text, voiceSettings.voiceName, voiceSettings.speed)} />
           ))}
@@ -231,22 +239,22 @@ const ChatWindow: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <footer className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <footer className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
             {imagePreview && (
-              <div className="absolute bottom-full left-0 mb-3 animate-in fade-in slide-in-from-bottom-2">
+              <div className="absolute bottom-full left-0 mb-4 animate-in fade-in slide-in-from-bottom-2">
                 <div className="relative group">
-                  <img src={imagePreview} className="w-24 h-24 object-cover rounded-xl border-4 border-white dark:border-gray-700 shadow-xl" />
-                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:scale-110 transition-transform">
-                    <XCircleIcon className="w-4 h-4"/>
+                  <img src={imagePreview} className="w-32 h-32 object-cover rounded-2xl border-4 border-white dark:border-gray-700 shadow-2xl" />
+                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 shadow-lg hover:bg-red-600 hover:scale-110 transition-all">
+                    <XCircleIcon className="w-5 h-5"/>
                   </button>
                 </div>
               </div>
             )}
             
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-2xl p-2 shadow-inner">
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700/50 rounded-3xl p-2 shadow-inner border border-transparent focus-within:border-primary-500/50 transition-all">
               <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-500 hover:text-primary-500 hover:bg-white dark:hover:bg-gray-600 rounded-xl transition-all">
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-3 text-gray-500 hover:text-primary-500 hover:bg-white dark:hover:bg-gray-600 rounded-2xl transition-all shadow-sm">
                 <PaperClipIcon className="w-6 h-6" />
               </button>
               
@@ -254,20 +262,21 @@ const ChatWindow: React.FC = () => {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit(e as any))}
-                placeholder="Écrivez ou importez une image..."
-                className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 px-1 resize-none max-h-32"
+                placeholder="Parlez-moi ou analysez une image..."
+                className="flex-1 bg-transparent border-none focus:ring-0 text-base py-3 px-2 resize-none max-h-32 scrollbar-hide"
                 rows={1}
               />
 
               <button
                 type="button"
-                onClick={() => { if (isListening) recognitionRef.current?.stop(); else { recognitionRef.current?.start(); setIsListening(true); } }}
-                className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 hover:text-primary-500 hover:bg-white dark:hover:bg-gray-600'}`}
+                onClick={toggleListening}
+                className={`p-3 rounded-2xl transition-all shadow-sm ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 hover:text-primary-500 hover:bg-white dark:hover:bg-gray-600'}`}
+                title="Dictée vocale"
               >
                 <MicrophoneIcon className="w-6 h-6" />
               </button>
 
-              <button type="submit" disabled={isLoading || (!input.trim() && !imageFile)} className="p-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:bg-gray-400 transition-all shadow-lg hover:scale-105 active:scale-95">
+              <button type="submit" disabled={isLoading || (!input.trim() && !imageFile)} className="p-3 bg-primary-600 text-white rounded-2xl hover:bg-primary-700 disabled:bg-gray-400 disabled:shadow-none transition-all shadow-lg hover:scale-105 active:scale-95">
                 <PaperAirplaneIcon className="w-6 h-6" />
               </button>
             </div>

@@ -2,6 +2,7 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { VoiceName } from "../types";
 
+// Utilise process.env.API_KEY injecté par le système
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 function decode(base64: string) {
@@ -46,6 +47,8 @@ export const stopSpeech = () => {
 };
 
 export const speakText = async (text: string, voiceName: VoiceName = 'Zephyr', speed: number = 1.0): Promise<void> => {
+  // Note: Si API_KEY est une clé OpenRouter, cet appel au SDK Google échouera.
+  // Le SDK Google nécessite une clé API Google Gemini valide.
   try {
     stopSpeech();
     
@@ -78,7 +81,6 @@ export const speakText = async (text: string, voiceName: VoiceName = 'Zephyr', s
 
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    // La vitesse de lecture (playbackRate)
     source.playbackRate.value = speed;
     
     source.connect(audioContext.destination);
@@ -92,6 +94,6 @@ export const speakText = async (text: string, voiceName: VoiceName = 'Zephyr', s
       };
     });
   } catch (error) {
-    console.error("Erreur TTS:", error);
+    console.error("Erreur TTS (Vérifiez si votre clé est compatible Google Cloud/Gemini):", error);
   }
 };

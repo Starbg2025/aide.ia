@@ -1,12 +1,9 @@
 
-import { GoogleGenAI } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 import { AIModel, Message } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 /**
- * Génère une réponse en streaming en tenant compte de l'historique (pour reasoning_details)
+ * Génère une réponse en streaming en tenant compte de l'historique
  */
 export const generateStreamingResponse = async (
   prompt: string, 
@@ -52,7 +49,7 @@ export const generateStreamingResponse = async (
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const dataStr = line.replace('data: ', '').trim();
-          if (dataStr === '[DONE]') continue;
+          if (dataStr === '[DONE]' || !dataStr) continue;
           
           try {
             const data = JSON.parse(dataStr);
@@ -71,7 +68,7 @@ export const generateStreamingResponse = async (
 };
 
 /**
- * Génère une réponse non-streamée pour capturer les reasoning_details (requis par le prompt utilisateur)
+ * Génère une réponse non-streamée pour capturer les reasoning_details
  */
 export const generateReasoningResponse = async (
   prompt: string,
@@ -103,28 +100,52 @@ export const generateReasoningResponse = async (
 };
 
 /**
- * Studio Code generation using the specified Gemini 3 Flash Reasoning logic
+ * Studio Code generation via OpenRouter Gemini 3 Flash (supporte reasoning)
  */
-export const generateStudioCode = async (prompt: string, onChunk: (chunk: string) => void): Promise<void> => {
+export const generateStudioCode = async (
+  prompt: string, 
+  systemInstruction: string,
+  onChunk: (chunk: string) => void
+): Promise<void> => {
   try {
-    // On utilise ici le streaming direct pour la fluidité dans le Studio
-    const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        systemInstruction: `Tu es un expert développeur et designer UI de chez Google AI Studio. 
-        Génère une application ou un site web "pixel-perfect" avec Tailwind CSS. 
-        Réponds par le code HTML complet et autonome.`,
-        thinkingConfig: { thinkingBudget: 8000 }
-      },
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        prompt, 
+        model: 'gemini-studio',
+        systemInstruction,
+        stream: true
+      })
     });
 
-    for await (const chunk of responseStream) {
-      const text = chunk.text;
-      if (text) onChunk(text);
+    if (!response.ok) throw new Error("Erreur Studio Backend");
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    if (!reader) return;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.replace('data: ', '').trim();
+          if (dataStr === '[DONE]' || !dataStr) continue;
+          try {
+            const data = JSON.parse(dataStr);
+            const content = data.choices?.[0]?.delta?.content || "";
+            if (content) onChunk(content);
+          } catch (e) {}
+        }
+      }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Studio Error:", error);
-    onChunk("Erreur lors de la génération. Réessayez.");
+    onChunk(`[Erreur de génération Studio: ${error.message}]`);
   }
 };

@@ -5,7 +5,7 @@ import { CodeBracketIcon, SparklesIcon, PaperAirplaneIcon, CogIcon, PlusIcon, XC
 
 const StudioPage: React.FC = () => {
   const [prompt, setPrompt] = useState('');
-  const [systemInstruction, setSystemInstruction] = useState('Tu es un UI Architect. Génère du code HTML/Tailwind propre et moderne.');
+  const [systemInstruction, setSystemInstruction] = useState('Tu es un UI Architect expert. Génère du code HTML/Tailwind propre, moderne et interactif. Réponds uniquement par le code HTML complet.');
   const [generatedCode, setGeneratedCode] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
@@ -19,10 +19,8 @@ const StudioPage: React.FC = () => {
     setGeneratedCode('');
     setActiveTab('preview');
 
-    const fullPrompt = `INSTRUCTION SYSTEME: ${systemInstruction}\n\nDEMANDE UTILISATEUR: ${prompt}`;
-
     try {
-      await generateStudioCode(fullPrompt, (chunk) => {
+      await generateStudioCode(prompt, systemInstruction, (chunk) => {
         setGeneratedCode(prev => prev + chunk);
       });
     } catch (error) {
@@ -37,10 +35,14 @@ const StudioPage: React.FC = () => {
       const doc = iframeRef.current.contentDocument;
       if (doc) {
         let cleanCode = generatedCode;
+        // Supprimer le markdown si présent
         const codeBlockRegex = /```html?([\s\S]*?)```/i;
         const match = generatedCode.match(codeBlockRegex);
         if (match && match[1]) {
           cleanCode = match[1];
+        } else {
+            // Nettoyage agressif si l'IA envoie du texte avant le code
+            cleanCode = cleanCode.replace(/```html?/g, '').replace(/```/g, '');
         }
 
         doc.open();
@@ -53,7 +55,7 @@ const StudioPage: React.FC = () => {
               <script src="https://cdn.tailwindcss.com"></script>
               <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
               <style>
-                body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+                body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
               </style>
             </head>
             <body>
@@ -68,7 +70,6 @@ const StudioPage: React.FC = () => {
 
   return (
     <div className="flex w-full h-[calc(100vh-100px)] bg-gray-50 dark:bg-gray-900 overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
-      {/* Sidebar de configuration (AI Studio style) */}
       <div className={`transition-all duration-300 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 ${sidebarOpen ? 'w-80' : 'w-0 overflow-hidden opacity-0'}`}>
         <div className="p-4 flex flex-col h-full space-y-6">
           <div className="flex items-center justify-between">
@@ -87,18 +88,17 @@ const StudioPage: React.FC = () => {
 
           <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-center text-xs">
-              <span>Modèle</span>
-              <span className="font-mono text-primary-500">Gemini 3 Pro</span>
+              <span>Modèle Studio</span>
+              <span className="font-mono text-primary-500">Gemini 3 Flash</span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span>Température</span>
-              <span className="font-mono">0.7</span>
+              <span>Mode</span>
+              <span className="font-mono">Raisonnement Actif</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between px-4">
           <div className="flex items-center gap-4">
@@ -127,7 +127,6 @@ const StudioPage: React.FC = () => {
           </div>
         </header>
 
-        {/* Content Viewport */}
         <div className="flex-1 relative bg-gray-100 dark:bg-black/20 p-4 overflow-hidden">
           {activeTab === 'preview' ? (
             <div className="w-full h-full bg-white rounded-lg shadow-inner overflow-hidden border border-gray-200">
@@ -160,14 +159,13 @@ const StudioPage: React.FC = () => {
           )}
         </div>
 
-        {/* Input Bar */}
         <footer className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
           <div className="max-w-4xl mx-auto flex gap-2">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleGenerate())}
-              placeholder="Décrivez votre application (ex: Dashboard SaaS moderne)..."
+              placeholder="Décrivez votre application (ex: Une page d'accueil pour un restaurant de sushi)..."
               className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-all"
               rows={1}
             />

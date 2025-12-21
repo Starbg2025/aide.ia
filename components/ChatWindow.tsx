@@ -19,7 +19,7 @@ const createNewConversation = (): Conversation => ({
   id: Date.now().toString(),
   title: 'Nouvelle discussion',
   messages: [
-    { id: 'init', role: 'assistant', text: "Bonjour ! Je suis AideIA. Je combine la puissance de DeepSeek R1 et la vision de Gemini. Comment puis-je vous aider ?" }
+    { id: 'init', role: 'assistant', text: "Bonjour ! Je suis AideIA. Je suis maintenant propulsé par Kimi K2 pour vos textes et Gemini pour la vision. Comment puis-je vous simplifier la vie aujourd'hui ?" }
   ]
 });
 

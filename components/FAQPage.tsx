@@ -37,33 +37,33 @@ const FAQPage: React.FC = () => {
             
             <div className="space-y-4">
                 <FAQItem question="C'est quoi AideIA ?">
-                    <p>AideIA est un assistant virtuel intelligent combinant les meilleurs modèles mondiaux : <strong>DeepSeek R1</strong> pour la réflexion et <strong>Gemini 3 Flash</strong> pour la rapidité et la vision.</p>
+                    <p>AideIA est un assistant virtuel intelligent combinant les meilleurs modèles mondiaux : <strong>Kimi K2</strong> pour la réflexion textuelle avancée et <strong>Gemini 3 Flash</strong> pour la rapidité et la vision.</p>
                 </FAQItem>
 
                 <FAQItem question="Comment fonctionne l'analyse d'images ?">
-                    <p>AideIA utilise désormais un double système :</p>
+                    <p>AideIA utilise un double système :</p>
                     <ul>
-                        <li><strong>OCR.space</strong> : Pour extraire le texte des documents, livres ou captures d'écran avec une précision chirurgicale.</li>
-                        <li><strong>Gemini Vision</strong> : Pour décrire ce qu'il voit si l'image ne contient pas de texte.</li>
+                        <li><strong>OCR.space</strong> : Pour extraire le texte des documents ou captures d'écran.</li>
+                        <li><strong>Gemini Vision</strong> : Pour décrire ce qu'il voit si l'image est purement visuelle.</li>
                     </ul>
-                    <p>Le résultat est ensuite traité par <strong>DeepSeek R1</strong> pour vous donner la réponse la plus intelligente possible.</p>
+                    <p>Le résultat est ensuite traité par <strong>Kimi K2</strong> pour vous donner une réponse contextuelle parfaite.</p>
                 </FAQItem>
 
                 <FAQItem question="Quels types de questions puis-je poser ?">
-                    <p>Grâce à DeepSeek, AideIA excelle dans :</p>
+                    <p>Grâce à Kimi K2, AideIA excelle dans :</p>
                     <ul>
-                        <li><strong>Raisonnement :</strong> Résolution de problèmes complexes étape par étape.</li>
-                        <li><strong>Programmation :</strong> Aide experte en développement logiciel.</li>
-                        <li><strong>Analyse de documents :</strong> Envoyez une photo d'un cours ou d'un contrat, et posez vos questions.</li>
+                        <li><strong>Raisonnement logique :</strong> Idéal pour les énigmes et les mathématiques.</li>
+                        <li><strong>Rédaction :</strong> Création de contenus fluides et naturels.</li>
+                        <li><strong>Analyse de documents :</strong> Posez des questions sur le texte extrait de vos photos.</li>
                     </ul>
                 </FAQItem>
 
                 <FAQItem question="Mes données sont-elles sécurisées ?">
-                    <p>Vos conversations sont sauvegardées uniquement dans votre navigateur (Stockage local). Les images sont traitées de manière éphémère pour l'analyse et ne sont pas stockées sur nos serveurs.</p>
+                    <p>Vos conversations sont sauvegardées uniquement dans votre navigateur. Les images sont traitées de manière éphémère pour l'analyse et ne sont jamais stockées durablement.</p>
                 </FAQItem>
                 
                  <FAQItem question="Qui a créé AideIA ?">
-                    <p>Le site a été créé par Benit Madimba en 2025 pour offrir une interface simplifiée aux technologies d'IA les plus puissantes du moment.</p>
+                    <p>Le site a été créé par Benit Madimba en 2025 pour rendre l'IA de pointe accessible à tous en un clic.</p>
                 </FAQItem>
             </div>
         </div>

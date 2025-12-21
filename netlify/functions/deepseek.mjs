@@ -24,7 +24,7 @@ export default async (req, context) => {
 
     if (!openRouterKey) {
       return new Response(JSON.stringify({ 
-        error: "Clé API OpenRouter manquante dans les variables d'environnement Netlify." 
+        error: "Clé API OpenRouter manquante." 
       }), { 
         status: 500,
         headers: { "Content-Type": "application/json" }
@@ -40,7 +40,7 @@ export default async (req, context) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-r1-0528:free",
+        "model": "moonshotai/kimi-k2:free",
         "messages": [
           {
             "role": "user",

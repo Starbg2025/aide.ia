@@ -3,8 +3,7 @@ import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 import { AIModel, Message } from '../types';
 
 /**
- * Service de communication avec OpenRouter
- * Implémente la logique de raisonnement (Reasoning) et de streaming
+ * Service de communication avec AideIA (via OpenRouter DeepSeek R1)
  */
 
 export const generateStreamingResponse = async (
@@ -20,13 +19,17 @@ export const generateStreamingResponse = async (
   }
 
   try {
+    const messages = history.map(m => ({
+      role: m.role,
+      content: m.text,
+      ...(m.reasoning_details ? { reasoning_details: m.reasoning_details } : {})
+    })).concat([{ role: 'user', content: prompt }]);
+
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        prompt, 
-        model, 
-        messages: history.concat([{ id: 'tmp', role: 'user', text: prompt }]),
+        messages: messages,
         stream: true
       })
     });
@@ -65,15 +68,13 @@ export const generateStreamingResponse = async (
 };
 
 /**
- * Workflow spécifique : Raisonnement Avancé (Capturer et renvoyer reasoning_details)
- * Comme demandé dans l'exemple SDK OpenRouter
+ * Workflow pour capturer les détails de raisonnement si disponible
  */
 export const generateReasoningResponse = async (
   prompt: string,
   model: AIModel,
   history: Message[]
 ): Promise<{ content: string; reasoning_details: any }> => {
-  // On prépare les messages en préservant les reasoning_details existants
   const messages = history.map(m => ({
     role: m.role,
     content: m.text,
@@ -84,10 +85,8 @@ export const generateReasoningResponse = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
-      model: 'gemini-3-flash', // On force le modèle de raisonnement
       messages: messages,
-      stream: false,
-      reasoning: { enabled: true }
+      stream: false
     })
   });
 
@@ -101,7 +100,7 @@ export const generateReasoningResponse = async (
   
   return {
     content: assistantMsg.content,
-    reasoning_details: assistantMsg.reasoning_details // Détails préservés pour le tour suivant
+    reasoning_details: assistantMsg.reasoning_details 
   };
 };
 
@@ -115,9 +114,10 @@ export const generateStudioCode = async (
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        prompt, 
-        model: 'gemini-studio',
-        systemInstruction,
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: prompt }
+        ],
         stream: true
       })
     });

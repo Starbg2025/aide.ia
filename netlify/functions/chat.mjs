@@ -19,26 +19,12 @@ export default async (req, context) => {
   }
 
   try {
-    const { prompt, messages, model, stream = true } = await req.json();
+    const { messages, stream = true } = await req.json();
     const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "Clé API absente du serveur." }), { status: 500 });
     }
-
-    // Reconstruction de la liste de messages au format attendu par OpenRouter
-    let apiMessages = [];
-    if (messages && messages.length > 0) {
-      apiMessages = messages.map(m => ({
-        role: m.role,
-        content: m.text || m.content
-      }));
-    } else {
-      apiMessages.push({ role: "user", content: prompt });
-    }
-
-    // Utilisation stricte du modèle demandé
-    const modelId = "deepseek/deepseek-r1-0528:free";
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -49,8 +35,8 @@ export default async (req, context) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": modelId,
-        "messages": apiMessages,
+        "model": "deepseek/deepseek-r1-0528:free",
+        "messages": messages,
         "stream": stream
       })
     });

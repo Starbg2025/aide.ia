@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import ChatWindow from './components/ChatWindow';
 import FAQPage from './components/FAQPage';
+import StudioPage from './components/StudioPage';
 import { ThemeProvider } from './hooks/useTheme';
 import { Page } from './types';
 
@@ -19,6 +20,8 @@ const App: React.FC = () => {
     switch (currentPage) {
       case 'chat':
         return <ChatWindow />;
+      case 'studio':
+        return <StudioPage />;
       case 'faq':
         return <FAQPage />;
       case 'home':
@@ -31,7 +34,7 @@ const App: React.FC = () => {
     <ThemeProvider>
       <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <Header onNavigate={navigateTo} currentPage={currentPage} />
-        <main className="flex-grow container mx-auto px-4 py-8 flex">
+        <main className="flex-grow container mx-auto px-4 py-8 flex items-stretch">
           {renderPage()}
         </main>
         <Footer />

@@ -3,7 +3,7 @@ export type Role = 'user' | 'assistant';
 
 export type VoiceName = 'Charon' | 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir';
 
-export type AIModel = 'deepseek' | 'qwen-coder';
+export type AIModel = 'deepseek' | 'qwen-coder' | 'gemini-pro';
 
 export interface VoiceSettings {
   enabled: boolean;
@@ -33,4 +33,4 @@ export interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-export type Page = 'home' | 'chat' | 'faq';
+export type Page = 'home' | 'chat' | 'faq' | 'studio';

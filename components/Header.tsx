@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '../hooks/useTheme';
-import { BrainIcon, SunIcon, MoonIcon } from './Icons';
+import { BrainIcon, SunIcon, MoonIcon, SparklesIcon } from './Icons';
 import { Page } from '../types';
 
 interface HeaderProps {
@@ -13,9 +13,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage }) => {
   const { theme, toggleTheme } = useTheme();
 
   const navLinkClasses = (page: Page) => 
-    `px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+    `px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
       currentPage === page 
-      ? 'bg-primary-500 text-white' 
+      ? 'bg-primary-500 text-white shadow-lg' 
       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
     }`;
 
@@ -30,7 +30,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage }) => {
         <div className="hidden md:flex items-center gap-2">
           <button onClick={() => onNavigate('home')} className={navLinkClasses('home')}>Accueil</button>
           <button onClick={() => onNavigate('chat')} className={navLinkClasses('chat')}>Chat IA</button>
-          <button onClick={() => onNavigate('faq')} className={navLinkClasses('faq')}>Aide / FAQ</button>
+          <button onClick={() => onNavigate('studio')} className={navLinkClasses('studio')}>
+            <SparklesIcon className="w-4 h-4 text-yellow-500" />
+            Studio
+          </button>
+          <button onClick={() => onNavigate('faq')} className={navLinkClasses('faq')}>FAQ</button>
         </div>
 
         <div className="flex items-center gap-4">
@@ -43,10 +47,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage }) => {
           </button>
         </div>
       </nav>
-       <div className="md:hidden flex justify-center gap-2 pb-3 border-t border-gray-200 dark:border-gray-700 pt-2">
+       <div className="md:hidden flex flex-wrap justify-center gap-2 pb-3 border-t border-gray-200 dark:border-gray-700 pt-2 px-2">
           <button onClick={() => onNavigate('home')} className={navLinkClasses('home')}>Accueil</button>
-          <button onClick={() => onNavigate('chat')} className={navLinkClasses('chat')}>Chat IA</button>
-          <button onClick={() => onNavigate('faq')} className={navLinkClasses('faq')}>Aide / FAQ</button>
+          <button onClick={() => onNavigate('chat')} className={navLinkClasses('chat')}>Chat</button>
+          <button onClick={() => onNavigate('studio')} className={navLinkClasses('studio')}>Studio</button>
+          <button onClick={() => onNavigate('faq')} className={navLinkClasses('faq')}>FAQ</button>
         </div>
     </header>
   );

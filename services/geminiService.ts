@@ -1,12 +1,12 @@
 
+import { GoogleGenAI } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 import { AIModel } from '../types';
 
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
 /**
- * Génère une réponse en streaming
- * @param prompt Le texte de l'utilisateur
- * @param model Le modèle d'IA à utiliser
- * @param onChunk Callback appelé à chaque nouveau morceau de texte
+ * Génère une réponse en streaming via OpenRouter (DeepSeek/Qwen)
  */
 export const generateStreamingResponse = async (
   prompt: string, 
@@ -64,6 +64,36 @@ export const generateStreamingResponse = async (
   } catch (error: any) {
     console.error("Streaming Error:", error);
     onChunk(`\n\n[Erreur: ${error.message || "AideIA rencontre une difficulté technique."}]`);
+  }
+};
+
+/**
+ * Génère du code d'application/site via Gemini 3 Pro pour le Studio
+ */
+export const generateStudioCode = async (prompt: string, onChunk: (chunk: string) => void): Promise<void> => {
+  try {
+    const responseStream = await ai.models.generateContentStream({
+      model: 'gemini-3-pro-preview',
+      contents: prompt,
+      config: {
+        systemInstruction: `Tu es un expert développeur Full Stack et UI/UX designer. 
+        Ta mission est de générer du code complet, moderne et fonctionnel pour des sites web ou des applications mobiles.
+        Utilise HTML5, Tailwind CSS et si nécessaire du JavaScript moderne.
+        Réponds DIRECTEMENT avec le code, sans explications superflues, sauf si c'est crucial.
+        Assure-toi que le design soit "pixel-perfect", responsive et esthétiquement impressionnant.`,
+        thinkingConfig: { thinkingBudget: 4000 }
+      },
+    });
+
+    for await (const chunk of responseStream) {
+      const text = chunk.text;
+      if (text) {
+        onChunk(text);
+      }
+    }
+  } catch (error) {
+    console.error("Studio Generation Error:", error);
+    onChunk("Erreur lors de la génération du code. Veuillez réessayer.");
   }
 };
 

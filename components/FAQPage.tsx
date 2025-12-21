@@ -29,41 +29,34 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, children }) => {
     );
 }
 
-
 const FAQPage: React.FC = () => {
     return (
         <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl">
             <h1 className="text-3xl font-bold mb-6 text-center text-primary-600 dark:text-primary-400">Aide & Questions Fréquentes</h1>
             
             <div className="space-y-4">
-                <FAQItem question="C'est quoi AideIA ?">
-                    <p>AideIA est un assistant virtuel intelligent combinant les meilleurs modèles mondiaux : <strong>Kimi K2</strong> pour la réflexion textuelle avancée et <strong>Gemini 3 Flash</strong> pour la rapidité et la vision.</p>
-                </FAQItem>
-
-                <FAQItem question="Comment fonctionne l'analyse d'images ?">
-                    <p>AideIA utilise un double système :</p>
+                <FAQItem question="Quels modèles utilisez-vous ?">
+                    <p>AideIA a évolué ! Nous n'utilisons plus Gemini pour la réflexion. Vous avez désormais le choix entre :</p>
                     <ul>
-                        <li><strong>OCR.space</strong> : Pour extraire le texte des documents ou captures d'écran.</li>
-                        <li><strong>Gemini Vision</strong> : Pour décrire ce qu'il voit si l'image est purement visuelle.</li>
-                    </ul>
-                    <p>Le résultat est ensuite traité par <strong>Kimi K2</strong> pour vous donner une réponse contextuelle parfaite.</p>
-                </FAQItem>
-
-                <FAQItem question="Quels types de questions puis-je poser ?">
-                    <p>Grâce à Kimi K2, AideIA excelle dans :</p>
-                    <ul>
-                        <li><strong>Raisonnement logique :</strong> Idéal pour les énigmes et les mathématiques.</li>
-                        <li><strong>Rédaction :</strong> Création de contenus fluides et naturels.</li>
-                        <li><strong>Analyse de documents :</strong> Posez des questions sur le texte extrait de vos photos.</li>
+                        <li><strong>Kimi K2 (Moonshot)</strong> : Ultra-fluide, parfait pour la rédaction et les discussions quotidiennes.</li>
+                        <li><strong>DeepSeek R1</strong> : Un modèle de raisonnement pur, idéal pour les problèmes complexes et le code.</li>
                     </ul>
                 </FAQItem>
 
-                <FAQItem question="Mes données sont-elles sécurisées ?">
-                    <p>Vos conversations sont sauvegardées uniquement dans votre navigateur. Les images sont traitées de manière éphémère pour l'analyse et ne sont jamais stockées durablement.</p>
+                <FAQItem question="Comment fonctionne l'analyse d'image sans Gemini ?">
+                    <p>Nous utilisons la technologie **OCR.space** pour lire le texte contenu dans vos images. Ce texte est ensuite analysé par Kimi ou DeepSeek pour répondre à vos questions. Notez que nous nous concentrons désormais sur les images contenant du texte.</p>
+                </FAQItem>
+
+                <FAQItem question="Comment changer de modèle ?">
+                    <p>Allez dans les **paramètres** (icône roue dentée) en haut à droite du chat. Vous pourrez basculer entre Kimi et DeepSeek instantanément.</p>
+                </FAQItem>
+
+                <FAQItem question="Est-ce gratuit ?">
+                    <p>Oui, AideIA utilise les versions gratuites de ces modèles via OpenRouter pour vous offrir un service performant sans frais.</p>
                 </FAQItem>
                 
-                 <FAQItem question="Qui a créé AideIA ?">
-                    <p>Le site a été créé par Benit Madimba en 2025 pour rendre l'IA de pointe accessible à tous en un clic.</p>
+                 <FAQItem question="Qui est derrière AideIA ?">
+                    <p>Le projet est toujours maintenu par **Benit Madimba**, avec l'objectif de vous fournir les meilleures IA du marché dans une interface simple et élégante.</p>
                 </FAQItem>
             </div>
         </div>

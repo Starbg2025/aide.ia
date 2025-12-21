@@ -3,11 +3,14 @@ export type Role = 'user' | 'assistant';
 
 export type VoiceName = 'Charon' | 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir';
 
+export type AIModel = 'kimi' | 'deepseek';
+
 export interface VoiceSettings {
   enabled: boolean;
   voiceName: VoiceName;
   autoPlay: boolean;
-  speed: number; // 0.5 à 2.0
+  speed: number;
+  model: AIModel; // Nouveau : Choix du modèle IA
 }
 
 export interface Message {

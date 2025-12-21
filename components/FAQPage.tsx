@@ -35,29 +35,24 @@ const FAQPage: React.FC = () => {
             <h1 className="text-3xl font-bold mb-6 text-center text-primary-600 dark:text-primary-400">Aide & Questions Fréquentes</h1>
             
             <div className="space-y-4">
-                <FAQItem question="Quels modèles sont disponibles ?">
-                    <p>AideIA vous propose deux moteurs spécialisés :
-                    <ul className="list-disc pl-5 mt-2">
-                      <li><strong>DeepSeek R1 :</strong> Idéal pour le raisonnement général, la rédaction et les questions complexes.</li>
-                      <li><strong>Qwen Coder :</strong> Spécialisé dans la programmation, capable de générer, corriger et expliquer du code dans de nombreux langages.</li>
-                    </ul>
-                    </p>
+                <FAQItem question="Quel modèle utilise AideIA ?">
+                    <p>AideIA est désormais propulsé exclusivement par <strong>DeepSeek R1</strong> via OpenRouter. Ce modèle est mondialement reconnu pour ses capacités de raisonnement logique exceptionnelles et sa polyvalence.</p>
                 </FAQItem>
 
-                <FAQItem question="Comment changer de modèle ?">
-                    <p>Dans la fenêtre de chat, vous trouverez un sélecteur en haut à droite (Général / Coding). Vous pouvez aussi changer de modèle via l'icône de réglages (roue dentée).</p>
+                <FAQItem question="Pourquoi DeepSeek R1 ?">
+                    <p>Nous avons choisi DeepSeek R1 car il offre des performances de pointe en mathématiques, en programmation et en raisonnement complexe, tout en restant accessible gratuitement pour nos utilisateurs.</p>
                 </FAQItem>
 
-                <FAQItem question="Le mode vocal fonctionne-t-il avec le code ?">
-                    <p>Oui, AideIA peut lire le code généré, bien que l'affichage visuel reste le meilleur moyen d'analyser de longs blocs de programmation.</p>
+                <FAQItem question="Puis-je utiliser AideIA pour coder ?">
+                    <p>Absolument. DeepSeek R1 excelle dans la génération de code, le débugging et l'explication de concepts algorithmiques complexes.</p>
                 </FAQItem>
 
-                <FAQItem question="Est-ce gratuit ?">
-                    <p>Oui, l'accès à DeepSeek R1 et Qwen Coder via AideIA est entièrement gratuit.</p>
+                <FAQItem question="Comment fonctionne la synthèse vocale ?">
+                    <p>AideIA utilise les dernières technologies de Text-to-Speech pour lire les réponses de l'IA. Vous pouvez activer ou désactiver cette fonction dans les réglages du chat.</p>
                 </FAQItem>
                 
-                 <FAQItem question="Qui a créé AideIA ?">
-                    <p>Le projet a été conçu et développé par <strong>Benit Madimba</strong> en 2025.</p>
+                 <FAQItem question="Qui est derrière AideIA ?">
+                    <p>Le projet a été créé par <strong>Benit Madimba</strong> avec l'objectif de rendre l'IA de haut niveau accessible à tous simplement.</p>
                 </FAQItem>
             </div>
         </div>

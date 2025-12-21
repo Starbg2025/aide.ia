@@ -19,45 +19,26 @@ export default async (req, context) => {
   }
 
   try {
-    const { prompt, messages, model, stream = true, systemInstruction, reasoning } = await req.json();
+    const { prompt, messages, model, stream = true } = await req.json();
     const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "Clé API absente du serveur." }), { status: 500 });
     }
 
+    // Reconstruction de la liste de messages au format attendu par OpenRouter
     let apiMessages = [];
-    if (systemInstruction) {
-      apiMessages.push({ role: "system", content: systemInstruction });
-    }
-
     if (messages && messages.length > 0) {
-      apiMessages = [...apiMessages, ...messages.map(m => ({
+      apiMessages = messages.map(m => ({
         role: m.role,
-        content: m.text || m.content,
-        ...(m.reasoning_details ? { reasoning_details: m.reasoning_details } : {})
-      }))];
+        content: m.text || m.content
+      }));
     } else {
       apiMessages.push({ role: "user", content: prompt });
     }
 
-    // Mappage des modèles selon la demande de l'utilisateur
-    // Utilisation de z-ai/glm-4.5-air:free comme modèle principal
-    let modelId = "z-ai/glm-4.5-air:free";
-    
-    if (model === 'qwen-coder') {
-      modelId = "qwen/qwen3-coder:free";
-    } else if (model === 'gemini-3-flash' || model === 'gemini-studio') {
-      // On garde un modèle capable de raisonnement pour ces options
-      modelId = "google/gemini-2.0-flash-thinking-exp:free";
-    }
-
-    const payload = {
-      "model": modelId,
-      "messages": apiMessages,
-      "stream": stream,
-      ...(reasoning ? { "reasoning": reasoning } : {})
-    };
+    // Utilisation stricte du modèle demandé
+    const modelId = "deepseek/deepseek-r1-0528:free";
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -67,12 +48,16 @@ export default async (req, context) => {
         "X-Title": "AideIA",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        "model": modelId,
+        "messages": apiMessages,
+        "stream": stream
+      })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      return new Response(JSON.stringify({ error: `Erreur API: ${response.status}`, details: errText }), { status: response.status });
+      return new Response(JSON.stringify({ error: `Erreur OpenRouter: ${response.status}`, details: errText }), { status: response.status });
     }
 
     return new Response(response.body, {

@@ -21,7 +21,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
     <div className="w-full text-center flex flex-col items-center">
       <div className="max-w-4xl">
         <div className="inline-block bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full px-4 py-1 mb-4 font-semibold text-sm">
-          Propulsé par Qwen 3 4B
+          Propulsé par Qwen 3 4B (OpenRouter)
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
           L’intelligence qui vous <span className="text-primary-600 dark:text-primary-400">simplifie la vie.</span>

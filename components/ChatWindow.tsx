@@ -7,14 +7,6 @@ import Message from './Message';
 import ConversationSidebar from './ConversationSidebar';
 import { PaperAirplaneIcon, MicrophoneIcon, MenuIcon, CogIcon, SparklesIcon, BrainIcon } from './Icons';
 
-const VOICES: { name: VoiceName, label: string, desc: string }[] = [
-  { name: 'Zephyr', label: 'Zephyr', desc: 'Féminin - Doux' },
-  { name: 'Kore', label: 'Kore', desc: 'Féminin - Clair' },
-  { name: 'Puck', label: 'Puck', desc: 'Masculin - Dynamique' },
-  { name: 'Charon', label: 'Charon', desc: 'Masculin - Profond' },
-  { name: 'Fenrir', label: 'Fenrir', desc: 'Masculin - Sérieux' },
-];
-
 const createNewConversation = (): Conversation => ({
   id: Date.now().toString(),
   title: 'Nouvelle discussion',

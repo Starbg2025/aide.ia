@@ -1,9 +1,10 @@
 
+import { GoogleGenAI } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
 import { AIModel, Message } from '../types';
 
 /**
- * Service de communication avec AideIA (via OpenRouter DeepSeek R1)
+ * Service de communication avec AideIA (Google Gemini API)
  */
 
 export const generateStreamingResponse = async (
@@ -18,48 +19,24 @@ export const generateStreamingResponse = async (
     return;
   }
 
-  try {
-    const messages = history.map(m => ({
-      role: m.role,
-      content: m.text,
-      ...(m.reasoning_details ? { reasoning_details: m.reasoning_details } : {})
-    })).concat([{ role: 'user', content: prompt }]);
+  // Create a new GoogleGenAI instance right before making an API call to ensure up-to-date configuration.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-    const response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        messages: messages,
-        stream: true
-      })
+  try {
+    // Correctly format contents for Gemini API: map 'assistant' role to 'model' and 'text' to 'parts'.
+    const contents = history.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.text }]
+    })).concat([{ role: 'user', parts: [{ text: prompt }] }]);
+
+    const response = await ai.models.generateContentStream({
+      model: 'gemini-3-flash-preview',
+      contents: contents,
     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || "Erreur communication");
-    }
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    if (!reader) throw new Error("Flux illisible");
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const dataStr = line.replace('data: ', '').trim();
-          if (dataStr === '[DONE]' || !dataStr) continue;
-          try {
-            const data = JSON.parse(dataStr);
-            const content = data.choices?.[0]?.delta?.content || "";
-            if (content) onChunk(content);
-          } catch (e) {}
-        }
+    for await (const chunk of response) {
+      if (chunk.text) {
+        onChunk(chunk.text);
       }
     }
   } catch (error: any) {
@@ -67,83 +44,59 @@ export const generateStreamingResponse = async (
   }
 };
 
-/**
- * Workflow pour capturer les détails de raisonnement si disponible
- */
-export const generateReasoningResponse = async (
-  prompt: string,
-  model: AIModel,
-  history: Message[]
-): Promise<{ content: string; reasoning_details: any }> => {
-  const messages = history.map(m => ({
-    role: m.role,
-    content: m.text,
-    ...(m.reasoning_details ? { reasoning_details: m.reasoning_details } : {})
-  })).concat([{ role: 'user', content: prompt }]);
-
-  const response = await fetch('/.netlify/functions/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      messages: messages,
-      stream: false
-    })
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error || "Erreur Raisonnement");
-  }
-
-  const result = await response.json();
-  const assistantMsg = result.choices[0].message;
-  
-  return {
-    content: assistantMsg.content,
-    reasoning_details: assistantMsg.reasoning_details 
-  };
-};
-
 export const generateStudioCode = async (
   prompt: string, 
   systemInstruction: string,
   onChunk: (chunk: string) => void
 ): Promise<void> => {
+  // Create a new GoogleGenAI instance right before making an API call.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
-    const response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        messages: [
-          { role: 'system', content: systemInstruction },
-          { role: 'user', content: prompt }
-        ],
-        stream: true
-      })
+    const response = await ai.models.generateContentStream({
+      model: 'gemini-3-flash-preview',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        systemInstruction: systemInstruction,
+      },
     });
 
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    if (!reader) return;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const dataStr = line.replace('data: ', '').trim();
-          if (dataStr === '[DONE]' || !dataStr) continue;
-          try {
-            const data = JSON.parse(dataStr);
-            const content = data.choices?.[0]?.delta?.content || "";
-            if (content) onChunk(content);
-          } catch (e) {}
-        }
+    for await (const chunk of response) {
+      if (chunk.text) {
+        onChunk(chunk.text);
       }
     }
   } catch (error: any) {
     onChunk(`[Erreur Studio: ${error.message}]`);
   }
+};
+
+export const generateReasoningResponse = async (
+  prompt: string,
+  model: AIModel,
+  history: Message[]
+): Promise<{ content: string; reasoning_details: any }> => {
+    // Create a new GoogleGenAI instance right before making an API call.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    // Fix: Properly map history to Gemini's expected Content format to avoid the TS error on line 150.
+    // The previous code failed because it tried to concat a Message array with objects that didn't match the Message type.
+    const contents = history.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.text }]
+    })).concat([{ role: 'user', parts: [{ text: prompt }] }]);
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: contents,
+      config: {
+        // Use thinkingConfig for advanced reasoning tasks with gemini-3-pro-preview.
+        thinkingConfig: { thinkingBudget: 16000 }
+      }
+    });
+
+    return {
+        content: response.text || "",
+        reasoning_details: null
+    };
 };

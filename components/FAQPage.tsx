@@ -37,7 +37,16 @@ const FAQPage: React.FC = () => {
             
             <div className="space-y-4">
                 <FAQItem question="C'est quoi AideIA ?">
-                    <p>AideIA est un assistant virtuel propulsé par le modèle <strong>DeepSeek R1</strong>, conçu pour vous aider dans vos tâches quotidiennes, vos études et votre travail grâce à une intelligence de pointe.</p>
+                    <p>AideIA est un assistant virtuel intelligent combinant les meilleurs modèles mondiaux : <strong>DeepSeek R1</strong> pour la réflexion et <strong>Gemini 3 Flash</strong> pour la rapidité et la vision.</p>
+                </FAQItem>
+
+                <FAQItem question="Comment fonctionne l'analyse d'images ?">
+                    <p>AideIA utilise désormais un double système :</p>
+                    <ul>
+                        <li><strong>OCR.space</strong> : Pour extraire le texte des documents, livres ou captures d'écran avec une précision chirurgicale.</li>
+                        <li><strong>Gemini Vision</strong> : Pour décrire ce qu'il voit si l'image ne contient pas de texte.</li>
+                    </ul>
+                    <p>Le résultat est ensuite traité par <strong>DeepSeek R1</strong> pour vous donner la réponse la plus intelligente possible.</p>
                 </FAQItem>
 
                 <FAQItem question="Quels types de questions puis-je poser ?">
@@ -45,21 +54,16 @@ const FAQPage: React.FC = () => {
                     <ul>
                         <li><strong>Raisonnement :</strong> Résolution de problèmes complexes étape par étape.</li>
                         <li><strong>Programmation :</strong> Aide experte en développement logiciel.</li>
-                        <li><strong>Rédaction :</strong> Création de contenus professionnels ou créatifs.</li>
-                        <li><strong>Éducation :</strong> Explications pédagogiques sur n'importe quel sujet.</li>
+                        <li><strong>Analyse de documents :</strong> Envoyez une photo d'un cours ou d'un contrat, et posez vos questions.</li>
                     </ul>
                 </FAQItem>
 
-                <FAQItem question="Mes conversations sont-elles sauvegardées ?">
-                    <p>Oui, vos conversations sont sauvegardées localement dans votre navigateur. Elles ne quittent pas votre appareil, sauf pour être traitées anonymement par l'IA lors de vos envois.</p>
-                </FAQItem>
-
-                <FAQItem question="Est-ce gratuit ?">
-                    <p>Oui, AideIA utilise actuellement le modèle gratuit de DeepSeek via OpenRouter pour vous offrir un service performant sans frais.</p>
+                <FAQItem question="Mes données sont-elles sécurisées ?">
+                    <p>Vos conversations sont sauvegardées uniquement dans votre navigateur (Stockage local). Les images sont traitées de manière éphémère pour l'analyse et ne sont pas stockées sur nos serveurs.</p>
                 </FAQItem>
                 
                  <FAQItem question="Qui a créé AideIA ?">
-                    <p>Le site a été créé et conçu par Benit Madimba en 2025 pour simplifier l'accès à l'IA de nouvelle génération.</p>
+                    <p>Le site a été créé par Benit Madimba en 2025 pour offrir une interface simplifiée aux technologies d'IA les plus puissantes du moment.</p>
                 </FAQItem>
             </div>
         </div>

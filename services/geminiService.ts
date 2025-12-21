@@ -1,16 +1,17 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
-import { AIModel } from '../types';
+import { AIModel, Message } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
- * Génère une réponse en streaming via OpenRouter (DeepSeek/Qwen)
+ * Génère une réponse en streaming en tenant compte de l'historique (pour reasoning_details)
  */
 export const generateStreamingResponse = async (
   prompt: string, 
   model: AIModel,
+  history: Message[],
   onChunk: (chunk: string) => void
 ): Promise<void> => {
   const lowerCasePrompt = prompt.toLowerCase();
@@ -24,7 +25,11 @@ export const generateStreamingResponse = async (
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, model })
+      body: JSON.stringify({ 
+        prompt, 
+        model, 
+        messages: history.concat([{ id: 'temp', role: 'user', text: prompt }])
+      })
     });
 
     if (!response.ok) {
@@ -55,52 +60,71 @@ export const generateStreamingResponse = async (
             if (content) {
               onChunk(content);
             }
-          } catch (e) {
-            // Ignorer les erreurs de parsing sur les fragments incomplets
-          }
+          } catch (e) {}
         }
       }
     }
   } catch (error: any) {
     console.error("Streaming Error:", error);
-    onChunk(`\n\n[Erreur: ${error.message || "AideIA rencontre une difficulté technique."}]`);
+    onChunk(`\n\n[Erreur: ${error.message}]`);
   }
 };
 
 /**
- * Génère du code d'application/site via Gemini 3 Pro pour le Studio
+ * Génère une réponse non-streamée pour capturer les reasoning_details (requis par le prompt utilisateur)
+ */
+export const generateReasoningResponse = async (
+  prompt: string,
+  model: AIModel,
+  history: Message[]
+): Promise<{ content: string; reasoning_details: any }> => {
+  const response = await fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      prompt, 
+      model, 
+      messages: history.concat([{ id: 'temp', role: 'user', text: prompt }]),
+      stream: false
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Erreur API");
+  }
+
+  const result = await response.json();
+  const choice = result.choices[0].message;
+  return {
+    content: choice.content,
+    reasoning_details: choice.reasoning_details
+  };
+};
+
+/**
+ * Studio Code generation using the specified Gemini 3 Flash Reasoning logic
  */
 export const generateStudioCode = async (prompt: string, onChunk: (chunk: string) => void): Promise<void> => {
   try {
+    // On utilise ici le streaming direct pour la fluidité dans le Studio
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        systemInstruction: `Tu es un expert développeur Full Stack et UI/UX designer. 
-        Ta mission est de générer du code complet, moderne et fonctionnel pour des sites web ou des applications mobiles.
-        Utilise HTML5, Tailwind CSS et si nécessaire du JavaScript moderne.
-        Réponds DIRECTEMENT avec le code, sans explications superflues, sauf si c'est crucial.
-        Assure-toi que le design soit "pixel-perfect", responsive et esthétiquement impressionnant.`,
-        thinkingConfig: { thinkingBudget: 4000 }
+        systemInstruction: `Tu es un expert développeur et designer UI de chez Google AI Studio. 
+        Génère une application ou un site web "pixel-perfect" avec Tailwind CSS. 
+        Réponds par le code HTML complet et autonome.`,
+        thinkingConfig: { thinkingBudget: 8000 }
       },
     });
 
     for await (const chunk of responseStream) {
       const text = chunk.text;
-      if (text) {
-        onChunk(text);
-      }
+      if (text) onChunk(text);
     }
   } catch (error) {
-    console.error("Studio Generation Error:", error);
-    onChunk("Erreur lors de la génération du code. Veuillez réessayer.");
+    console.error("Studio Error:", error);
+    onChunk("Erreur lors de la génération. Réessayez.");
   }
-};
-
-export const generateResponse = async (prompt: string, model: AIModel = 'deepseek'): Promise<string> => {
-  let fullText = "";
-  await generateStreamingResponse(prompt, model, (chunk) => {
-    fullText += chunk;
-  });
-  return fullText;
 };

@@ -3,7 +3,7 @@ export type Role = 'user' | 'assistant';
 
 export type VoiceName = 'Charon' | 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir';
 
-export type AIModel = 'deepseek' | 'qwen-coder' | 'gemini-pro';
+export type AIModel = 'deepseek' | 'qwen-coder' | 'gemini-3-flash';
 
 export interface VoiceSettings {
   enabled: boolean;
@@ -17,6 +17,7 @@ export interface Message {
   role: Role;
   text: string;
   image?: string; 
+  reasoning_details?: any; // Pour stocker les détails de raisonnement d'OpenRouter
 }
 
 export interface Conversation {

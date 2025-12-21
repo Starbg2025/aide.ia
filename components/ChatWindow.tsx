@@ -23,7 +23,7 @@ const createNewConversation = (): Conversation => ({
     { 
       id: 'init', 
       role: 'assistant', 
-      text: "Bonjour ! Je suis AideIA, propulsé par DeepSeek R1. Comment puis-je vous aider aujourd'hui ?" 
+      text: "Bonjour ! Je suis AideIA, propulsé par Qwen 3 4B. Comment puis-je vous aider aujourd'hui ?" 
     }
   ]
 });
@@ -161,7 +161,7 @@ const ChatWindow: React.FC = () => {
             <div className="flex flex-col">
               <h2 className="font-bold truncate text-sm md:text-base">{activeConversation?.title}</h2>
               <span className="text-[10px] uppercase tracking-wider text-primary-500 font-bold flex items-center gap-1">
-                <BrainIcon className="w-3 h-3" /> DeepSeek R1 Reasoning
+                <BrainIcon className="w-3 h-3" /> Qwen 3 Intelligence
               </span>
             </div>
           </div>
@@ -191,7 +191,7 @@ const ChatWindow: React.FC = () => {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit(e as any))}
-              placeholder="Posez une question à DeepSeek R1..."
+              placeholder="Posez une question à Qwen 3 4B..."
               className="flex-1 bg-transparent border-none focus:ring-0 text-base py-3 px-2 resize-none max-h-32 text-gray-800 dark:text-gray-100"
               rows={1}
             />

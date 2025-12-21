@@ -72,8 +72,8 @@ const StudioPage: React.FC = () => {
             />
           </div>
           <div className="pt-4 border-t border-gray-100 dark:border-gray-700 text-xs space-y-2">
-            <div className="flex justify-between"><span>Moteur</span><span className="font-mono text-primary-500">DeepSeek R1</span></div>
-            <div className="flex justify-between"><span>Raisonnement</span><span className="font-mono text-green-500">Activé</span></div>
+            <div className="flex justify-between"><span>Moteur</span><span className="font-mono text-primary-500">Qwen 3 4B</span></div>
+            <div className="flex justify-between"><span>Vitesse</span><span className="font-mono text-green-500">Optimisée</span></div>
             <div className="flex justify-between"><span>Accès</span><span className="font-mono text-blue-500">Gratuit</span></div>
           </div>
         </div>
@@ -101,7 +101,7 @@ const StudioPage: React.FC = () => {
             {isGenerating && !generatedCode && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
                 <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Génération par DeepSeek R1...</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Conception par Qwen 3...</p>
               </div>
             )}
           </div>
@@ -113,7 +113,7 @@ const StudioPage: React.FC = () => {
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleGenerate())}
-              placeholder="Ex: Une application de gestion de contacts interactive..."
+              placeholder="Décrivez l'interface que vous souhaitez créer..."
               className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-800 dark:text-gray-100"
               rows={1}
             />

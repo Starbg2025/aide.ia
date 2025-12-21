@@ -36,23 +36,23 @@ const FAQPage: React.FC = () => {
             
             <div className="space-y-4">
                 <FAQItem question="Quel modèle utilise AideIA ?">
-                    <p>AideIA est désormais propulsé exclusivement par <strong>DeepSeek R1</strong> via OpenRouter. Ce modèle est mondialement reconnu pour ses capacités de raisonnement logique exceptionnelles et sa polyvalence.</p>
+                    <p>AideIA utilise désormais le modèle <strong>Qwen 3 4B</strong> via OpenRouter. Ce modèle de dernière génération offre un excellent équilibre entre rapidité et intelligence pour toutes vos tâches quotidiennes.</p>
                 </FAQItem>
 
-                <FAQItem question="Pourquoi DeepSeek R1 ?">
-                    <p>Nous avons choisi DeepSeek R1 car il offre des performances de pointe en mathématiques, en programmation et en raisonnement complexe, tout en restant accessible gratuitement pour nos utilisateurs.</p>
+                <FAQItem question="Pourquoi Qwen 3 ?">
+                    <p>Qwen 3 est l'un des modèles les plus performants dans sa catégorie, offrant des capacités de compréhension du langage naturel et de génération de texte de haut niveau, tout en étant extrêmement réactif.</p>
                 </FAQItem>
 
                 <FAQItem question="Puis-je utiliser AideIA pour coder ?">
-                    <p>Absolument. DeepSeek R1 excelle dans la génération de code, le débugging et l'explication de concepts algorithmiques complexes.</p>
+                    <p>Oui, Qwen 3 est tout à fait capable de vous aider avec des snippets de code, d'expliquer des fonctions ou de vous guider dans vos projets de programmation simples.</p>
                 </FAQItem>
 
                 <FAQItem question="Comment fonctionne la synthèse vocale ?">
-                    <p>AideIA utilise les dernières technologies de Text-to-Speech pour lire les réponses de l'IA. Vous pouvez activer ou désactiver cette fonction dans les réglages du chat.</p>
+                    <p>AideIA intègre des voix naturelles pour lire les réponses générées. Vous pouvez personnaliser ces réglages (vitesse, choix de la voix) directement dans l'interface de discussion.</p>
                 </FAQItem>
                 
                  <FAQItem question="Qui est derrière AideIA ?">
-                    <p>Le projet a été créé par <strong>Benit Madimba</strong> avec l'objectif de rendre l'IA de haut niveau accessible à tous simplement.</p>
+                    <p>Le projet a été créé par <strong>Benit Madimba</strong> avec l'objectif de démocratiser l'accès aux meilleures technologies d'intelligence artificielle.</p>
                 </FAQItem>
             </div>
         </div>

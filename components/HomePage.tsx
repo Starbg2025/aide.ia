@@ -21,13 +21,13 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
     <div className="w-full text-center flex flex-col items-center">
       <div className="max-w-4xl">
         <div className="inline-block bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full px-4 py-1 mb-4 font-semibold text-sm">
-          Propulsé par DeepSeek R1
+          Propulsé par Qwen 3 4B
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
           L’intelligence qui vous <span className="text-primary-600 dark:text-primary-400">simplifie la vie.</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Découvrez AideIA, votre assistant intelligent utilisant la puissance de DeepSeek R1 pour résoudre vos problèmes les plus complexes avec un raisonnement avancé.
+          Découvrez AideIA, votre assistant intelligent utilisant la puissance de Qwen 3 pour résoudre vos problèmes quotidiens avec rapidité et précision.
         </p>
         <button 
           onClick={onStartChat}
@@ -43,33 +43,33 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
           <FeatureCard 
             icon={<ChatBubbleIcon className="w-6 h-6" />}
-            title="Raisonnement Profond"
-            description="Utilise DeepSeek R1 pour analyser vos demandes sous tous les angles avant de répondre."
+            title="Réponses Instantanées"
+            description="Utilise Qwen 3 4B pour des réponses ultra-rapides et pertinentes à toutes vos questions."
           />
           <FeatureCard 
             icon={<CodeBracketIcon className="w-6 h-6" />}
-            title="Expert Coding"
-            description="Génération de code robuste et explications détaillées pour tous les langages de programmation."
+            title="Aide au Codage"
+            description="Génération de snippets de code et explications claires pour vos projets de développement."
           />
           <FeatureCard 
             icon={<MicrophoneIcon className="w-6 h-6" />}
             title="Interface Vocale"
-            description="Interagissez naturellement par la voix avec des synthèses vocales ultra-réalistes."
+            description="Interagissez naturellement par la voix avec des synthèses vocales de haute qualité."
           />
           <FeatureCard 
             icon={<AcademicCapIcon className="w-6 h-6" />}
             title="Assistance Scolaire"
-            description="Explications pédagogiques pour les mathématiques, les sciences et la littérature."
+            description="Explications simples pour les devoirs, les mathématiques et les concepts scientifiques."
           />
           <FeatureCard 
             icon={<LanguageIcon className="w-6 h-6" />}
-            title="Traduction Contextuelle"
-            description="Traduit vos textes en conservant les nuances culturelles et le ton approprié."
+            title="Traduction Polyglotte"
+            description="Traduit vos textes instantanément dans des dizaines de langues étrangères."
           />
           <FeatureCard 
             icon={<SparklesIcon className="w-6 h-6" />}
-            title="Gratuit & Performant"
-            description="Accédez au meilleur de l'IA gratuitement, sans compromis sur la qualité."
+            title="Gratuit & Accessible"
+            description="Accédez au meilleur de l'IA gratuitement, partout et à tout moment."
           />
         </div>
       </div>

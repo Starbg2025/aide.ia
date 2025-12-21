@@ -1,72 +1,76 @@
 
-import { AIModel } from '../types';
 import { CREATOR_RESPONSE, CREATOR_KEYWORDS } from '../constants';
-
-const OCR_API_KEY = "K86736252288957";
+import { AIModel } from '../types';
 
 /**
- * Utilise OCR.space pour extraire le texte d'une image
+ * Génère une réponse en streaming
+ * @param prompt Le texte de l'utilisateur
+ * @param model Le modèle d'IA à utiliser
+ * @param onChunk Callback appelé à chaque nouveau morceau de texte
  */
-const performOCR = async (file: File): Promise<string | null> => {
-  try {
-    const formData = new FormData();
-    formData.append("apikey", OCR_API_KEY);
-    formData.append("language", "fre");
-    formData.append("isOverlayRequired", "false");
-    formData.append("file", file);
-
-    const response = await fetch("https://api.ocr.space/parse/image", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-    if (data.IsErroredOnProcessing) {
-      console.warn("OCR.space Error:", data.ErrorMessage);
-      return null;
-    }
-    return data.ParsedResults?.[0]?.ParsedText || null;
-  } catch (error) {
-    console.error("OCR Request failed:", error);
-    return null;
-  }
-};
-
-export const generateResponse = async (prompt: string, model: AIModel = 'kimi', imageFile?: File): Promise<string> => {
+export const generateStreamingResponse = async (
+  prompt: string, 
+  model: AIModel,
+  onChunk: (chunk: string) => void
+): Promise<void> => {
   const lowerCasePrompt = prompt.toLowerCase();
   
   if (CREATOR_KEYWORDS.some(keyword => lowerCasePrompt.includes(keyword))) {
-    return CREATOR_RESPONSE;
-  }
-
-  let finalPrompt = prompt;
-
-  if (imageFile) {
-    const extractedText = await performOCR(imageFile);
-    if (extractedText) {
-      finalPrompt = `[Texte extrait de l'image]:\n${extractedText}\n\n[Question]:\n${prompt || "Analyse ce texte."}`;
-    } else {
-      return "Je n'ai pas pu lire de texte dans cette image. Assurez-vous que le texte est bien visible et réessayez.";
-    }
+    onChunk(CREATOR_RESPONSE);
+    return;
   }
 
   try {
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: finalPrompt, model })
+      body: JSON.stringify({ prompt, model })
     });
 
-    const data = await response.json();
-
-    if (response.ok) {
-      return data.text;
-    } else {
-      // Retourne l'erreur précise venant du backend
-      return `Oups ! Une erreur est survenue côté serveur : ${data.error || 'Erreur inconnue'}.`;
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Erreur lors de la communication avec l'IA.");
     }
-  } catch (error) {
-    console.error("Network or Processing Error:", error);
-    return "Impossible de contacter AideIA. Si vous êtes en local, utilisez 'netlify dev'. Sinon, vérifiez votre connexion internet.";
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+
+    if (!reader) throw new Error("Impossible de lire le flux de réponse.");
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.replace('data: ', '').trim();
+          if (dataStr === '[DONE]') continue;
+          
+          try {
+            const data = JSON.parse(dataStr);
+            const content = data.choices?.[0]?.delta?.content || "";
+            if (content) {
+              onChunk(content);
+            }
+          } catch (e) {
+            // Ignorer les erreurs de parsing sur les fragments incomplets
+          }
+        }
+      }
+    }
+  } catch (error: any) {
+    console.error("Streaming Error:", error);
+    onChunk(`\n\n[Erreur: ${error.message || "AideIA rencontre une difficulté technique."}]`);
   }
+};
+
+export const generateResponse = async (prompt: string, model: AIModel = 'deepseek'): Promise<string> => {
+  let fullText = "";
+  await generateStreamingResponse(prompt, model, (chunk) => {
+    fullText += chunk;
+  });
+  return fullText;
 };

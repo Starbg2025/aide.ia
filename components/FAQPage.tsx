@@ -35,28 +35,29 @@ const FAQPage: React.FC = () => {
             <h1 className="text-3xl font-bold mb-6 text-center text-primary-600 dark:text-primary-400">Aide & Questions Fréquentes</h1>
             
             <div className="space-y-4">
-                <FAQItem question="Quels modèles utilisez-vous ?">
-                    <p>AideIA a évolué ! Nous n'utilisons plus Gemini pour la réflexion. Vous avez désormais le choix entre :</p>
-                    <ul>
-                        <li><strong>Kimi K2 (Moonshot)</strong> : Ultra-fluide, parfait pour la rédaction et les discussions quotidiennes.</li>
-                        <li><strong>DeepSeek R1</strong> : Un modèle de raisonnement pur, idéal pour les problèmes complexes et le code.</li>
+                <FAQItem question="Quels modèles sont disponibles ?">
+                    <p>AideIA vous propose deux moteurs spécialisés :
+                    <ul className="list-disc pl-5 mt-2">
+                      <li><strong>DeepSeek R1 :</strong> Idéal pour le raisonnement général, la rédaction et les questions complexes.</li>
+                      <li><strong>Qwen Coder :</strong> Spécialisé dans la programmation, capable de générer, corriger et expliquer du code dans de nombreux langages.</li>
                     </ul>
-                </FAQItem>
-
-                <FAQItem question="Comment fonctionne l'analyse d'image sans Gemini ?">
-                    <p>Nous utilisons la technologie **OCR.space** pour lire le texte contenu dans vos images. Ce texte est ensuite analysé par Kimi ou DeepSeek pour répondre à vos questions. Notez que nous nous concentrons désormais sur les images contenant du texte.</p>
+                    </p>
                 </FAQItem>
 
                 <FAQItem question="Comment changer de modèle ?">
-                    <p>Allez dans les **paramètres** (icône roue dentée) en haut à droite du chat. Vous pourrez basculer entre Kimi et DeepSeek instantanément.</p>
+                    <p>Dans la fenêtre de chat, vous trouverez un sélecteur en haut à droite (Général / Coding). Vous pouvez aussi changer de modèle via l'icône de réglages (roue dentée).</p>
+                </FAQItem>
+
+                <FAQItem question="Le mode vocal fonctionne-t-il avec le code ?">
+                    <p>Oui, AideIA peut lire le code généré, bien que l'affichage visuel reste le meilleur moyen d'analyser de longs blocs de programmation.</p>
                 </FAQItem>
 
                 <FAQItem question="Est-ce gratuit ?">
-                    <p>Oui, AideIA utilise les versions gratuites de ces modèles via OpenRouter pour vous offrir un service performant sans frais.</p>
+                    <p>Oui, l'accès à DeepSeek R1 et Qwen Coder via AideIA est entièrement gratuit.</p>
                 </FAQItem>
                 
-                 <FAQItem question="Qui est derrière AideIA ?">
-                    <p>Le projet est toujours maintenu par **Benit Madimba**, avec l'objectif de vous fournir les meilleures IA du marché dans une interface simple et élégante.</p>
+                 <FAQItem question="Qui a créé AideIA ?">
+                    <p>Le projet a été conçu et développé par <strong>Benit Madimba</strong> en 2025.</p>
                 </FAQItem>
             </div>
         </div>

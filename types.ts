@@ -3,14 +3,13 @@ export type Role = 'user' | 'assistant';
 
 export type VoiceName = 'Charon' | 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir';
 
-export type AIModel = 'kimi' | 'deepseek';
+export type AIModel = 'deepseek' | 'qwen-coder';
 
 export interface VoiceSettings {
   enabled: boolean;
   voiceName: VoiceName;
   autoPlay: boolean;
   speed: number;
-  model: AIModel; // Nouveau : Choix du modèle IA
 }
 
 export interface Message {
@@ -24,6 +23,7 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
+  model?: AIModel;
 }
 
 export type Theme = 'light' | 'dark';

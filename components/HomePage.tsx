@@ -21,13 +21,13 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
     <div className="w-full text-center flex flex-col items-center">
       <div className="max-w-4xl">
         <div className="inline-block bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full px-4 py-1 mb-4 font-semibold text-sm">
-          Propulsé par DeepSeek R1
+          Propulsé par GLM-4.5 Air
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
           L’intelligence qui vous <span className="text-primary-600 dark:text-primary-400">simplifie la vie.</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-          Découvrez AideIA, votre assistant intelligent utilisant la puissance de DeepSeek pour répondre à toutes vos questions complexes en un instant.
+          Découvrez AideIA, votre assistant intelligent utilisant la puissance de GLM-4.5 pour répondre à toutes vos questions complexes en un instant.
         </p>
         <button 
           onClick={onStartChat}
@@ -49,7 +49,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartChat }) => {
           <FeatureCard 
             icon={<CodeBracketIcon className="w-6 h-6" />}
             title="Expert Coding"
-            description="DeepSeek R1 est l'un des meilleurs modèles pour générer et débugger du code informatique."
+            description="Accès à des modèles spécialisés pour générer et débugger du code informatique avec précision."
           />
           <FeatureCard 
             icon={<MicrophoneIcon className="w-6 h-6" />}
